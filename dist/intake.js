@@ -5,21 +5,6 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
 
 (() => {
   'use strict';
-  const birthTimes = [
-    ['unknown', '시간 모름', null, null],
-    ['zi', '자시 · 23:00–00:59', '23:00', '01:00'],
-    ['chou', '축시 · 01:00–02:59', '01:00', '03:00'],
-    ['yin', '인시 · 03:00–04:59', '03:00', '05:00'],
-    ['mao', '묘시 · 05:00–06:59', '05:00', '07:00'],
-    ['chen', '진시 · 07:00–08:59', '07:00', '09:00'],
-    ['si', '사시 · 09:00–10:59', '09:00', '11:00'],
-    ['wu', '오시 · 11:00–12:59', '11:00', '13:00'],
-    ['wei', '미시 · 13:00–14:59', '13:00', '15:00'],
-    ['shen', '신시 · 15:00–16:59', '15:00', '17:00'],
-    ['you', '유시 · 17:00–18:59', '17:00', '19:00'],
-    ['xu', '술시 · 19:00–20:59', '19:00', '21:00'],
-    ['hai', '해시 · 21:00–22:59', '21:00', '23:00']
-  ];
   const regions = ['서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원특별자치도', '충청북도', '충청남도', '전북특별자치도', '전라남도', '경상북도', '경상남도', '제주특별자치도', '해외·기타'];
   const studyLabels = {'early-school':'유치·초등', 'secondary-school':'중고등 학교내신', 'college-entrance':'수능•대학입시', 'certification-language':'자격증·어학', 'job-preparation':'취업 준비', 'public-professional':'공무원·전문직', career:'직장인·커리어', 'self-development':'자기계발·취미'};
   const relationLabels = {father:'부', mother:'모', grandparent:'조부모'};
@@ -54,6 +39,24 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   const calendar = section => section.querySelector('[data-field="calendar"]:checked').value;
   function addOption(select, value, label) {
     select.add(new Option(label, String(value)));
+  }
+  function syncBirthTime(section) {
+    const unknown = field(section, 'timeUnknown').checked;
+    ['hour', 'minute'].forEach(key => {
+      const control = field(section, key);
+      control.disabled = unknown;
+      control.required = !unknown;
+    });
+    // Keep the draft selections for unchecking, but omit them from unknown-time payloads.
+  }
+  function initBirthTime(section) {
+    for (let h = 0; h < 24; h++) addOption(field(section, 'hour'), h, `${String(h).padStart(2, '0')}시`);
+    for (let m = 0; m < 60; m++) addOption(field(section, 'minute'), m, `${String(m).padStart(2, '0')}분`);
+    field(section, 'timeUnknown').addEventListener('change', () => syncBirthTime(section));
+    syncBirthTime(section);
+  }
+  function formatBirthTime(time) {
+    return time.isUnknown ? '시간 모름' : `${String(time.hour).padStart(2, '0')}시 ${String(time.minute).padStart(2, '0')}분`;
   }
   function syncDate(section) {
     const year = Number(field(section, 'year').value);
@@ -98,7 +101,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     const year = field(section, 'year');
     for (let y = new Date().getFullYear(); y >= 1900; y--) addOption(year, y, `${y}년`);
     for (let m = 1; m <= 12; m++) addOption(field(section, 'month'), m, `${m}월`);
-    birthTimes.forEach(([value, label]) => addOption(field(section, 'time'), value, label));
+    initBirthTime(section);
     regions.forEach(region => addOption(field(section, 'region'), region, region));
     section.querySelectorAll('[data-field="calendar"], [data-field="year"], [data-field="month"]').forEach(control => control.addEventListener('change', () => syncDate(section)));
     field(section, 'day').addEventListener('change', () => validatePerson(section));
@@ -241,12 +244,12 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
 
   function readPerson(key) {
     const section = sections[key];
-    const selectedTime = birthTimes.find(item => item[0] === field(section, 'time').value);
+    const isUnknown = field(section, 'timeUnknown').checked;
     return {
       name:field(section, 'name').value.trim(),
       gender:section.querySelector('[data-field="gender"]:checked').value,
       birthDate:{year:Number(field(section, 'year').value), month:Number(field(section, 'month').value), day:Number(field(section, 'day').value), calendar:calendar(section), isLeapMonth:calendar(section) === 'lunar' && field(section, 'leap').checked},
-      birthTime:{period:selectedTime[0], start:selectedTime[2], end:selectedTime[3]},
+      birthTime:{isUnknown, hour:isUnknown ? null : Number(field(section, 'hour').value), minute:isUnknown ? null : Number(field(section, 'minute').value)},
       birthRegion:field(section, 'region').value
     };
   }
@@ -256,7 +259,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     const list = document.createElement('dl');
     const b = person.birthDate;
     const dateLabel = `${b.year}년 ${b.month}월 ${b.day}일 · ${b.calendar === 'solar' ? '양력' : b.isLeapMonth ? '음력 윤달' : '음력'}`;
-    const entries = [['이름', person.name], ['성별', genderLabels[person.gender]], ['생년월일', dateLabel], ['태어난 시간', birthTimes.find(time => time[0] === person.birthTime.period)[1]], ['태어난 지역', person.birthRegion]];
+    const entries = [['이름', person.name], ['성별', genderLabels[person.gender]], ['생년월일', dateLabel], ['태어난 시간', formatBirthTime(person.birthTime)], ['태어난 지역', person.birthRegion]];
     if (relationship) entries.unshift(['관계', relationLabels[relationship]]);
     entries.forEach(([label, value]) => {
       const row = document.createElement('div');
@@ -415,7 +418,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     Object.values(sections).filter(section => !section.disabled).forEach(validatePerson);
     if (!form.reportValidity()) return;
     const payload = {
-      schemaVersion:5,
+      schemaVersion:6,
       audience,
       learner:readPerson(audience),
       guardian:audience === 'child' ? {...readPerson('guardian'), relationship:form.querySelector('[name="guardian-relationship"]:checked').value} : null,

@@ -27,5 +27,11 @@ for (const audience of ['self','child']) {
   }
 }
 assert.equal(calls, 3);
+const exact = await calculateCore({schemaVersion:6,audience:'self',learner:{...person,birthTime:{isUnknown:false,hour:7,minute:40}}},{period,fetchImpl});
+assert.equal(exact.subjects.learner.status,'ok');
+assert.ok(exact.subjects.learner.result.timeline.data.segments.some(s=>s.daeunPillar));
+const unknown = await calculateCore({schemaVersion:6,audience:'self',learner:{...person,birthTime:{isUnknown:true,hour:null,minute:null}}},{period,fetchImpl});
+assert.equal(unknown.subjects.learner.status,'ok');
+assert.ok(unknown.subjects.learner.result.timeline.data.daeunRanges.length);
 await assert.rejects(calculateCore({schemaVersion:5,audience:'self',learner:{...person,birthDate:{...person.birthDate,month:2,day:30}}},{period,fetchImpl}), e => e instanceof CoreError && e.response.status === 'error');
 console.log('PASS: self + child/guardian browser adapter -> HTTP -> unchanged core, and invalid date');

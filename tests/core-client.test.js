@@ -4,6 +4,20 @@ import {toCoreSubject, calculateCore, currentPeriod, analyzeCore} from '../dist/
 
 const person = {name:'private',gender:'female',birthDate:{year:1990,month:5,day:12,calendar:'solar',isLeapMonth:false},birthTime:{period:'chen'},birthRegion:'서울특별시'};
 
+test('exact UI hours and minutes and unknown map without inventing birth times', async () => {
+  const exact = {...person,birthTime:{isUnknown:false,hour:0,minute:5}};
+  assert.deepEqual(toCoreSubject(exact,'learner').birthTime,{mode:'exact',value:'00:05:00',uncertaintySeconds:0});
+  assert.deepEqual(toCoreSubject({...person,birthTime:{isUnknown:true,hour:14,minute:30}},'learner').birthTime,{mode:'unknown'});
+  for (const time of [{isUnknown:false,hour:24,minute:0},{isUnknown:false,hour:null,minute:0},{isUnknown:false,hour:12,minute:60}]) {
+    assert.throws(() => toCoreSubject({...person,birthTime:time},'learner'),{code:'INVALID_INPUT'});
+  }
+  await calculateCore({schemaVersion:6,audience:'self',learner:exact},{fetchImpl:async (_,options) => {
+    const request=JSON.parse(options.body);
+    assert.equal(request.subjects[0].birthTime.value,'00:05:00');
+    return {ok:true,json:async()=>({schemaVersion:'1.1.0',requestId:request.requestId,status:'ok',result:{kind:'timeline',subjects:[]}})};
+  }});
+});
+
 test('input mapping preserves uncertainty, lunar date, leap flag and direction', () => {
   for (const [period, value] of Object.entries({zi:'子',chou:'丑',yin:'寅',mao:'卯',chen:'辰',si:'巳',wu:'午',wei:'未',shen:'申',you:'酉',xu:'戌',hai:'亥'})) {
     assert.deepEqual(toCoreSubject({...person,birthTime:{period}},'learner').birthTime, {mode:'branch',value,ziPart:'unspecified'});

@@ -14,7 +14,7 @@ python -m venv .venv
 .venv/Scripts/python.exe -B -m server.app --port 8000
 ```
 
-macOS/Linux에서는 `.venv/bin/python`을 사용한다. 다른 위치의 엔진은 `SAJU_CORE_ROOT` 환경변수로 지정한다. `/start.html`에서 기존 입력 흐름을 사용한다. 서버는 로컬 `127.0.0.1`에만 바인딩되며 `dist`와 API를 같은 출처로 제공한다. 서버 시작 시 Python·의존성·동결 파일·등록 소스 117개를 검증한다. 고정 버전이 다르면 실행을 중단한다. 위 v1.1 커밋은 로컬 검증본으로, 원격에서 받으려면 별도로 승인한 GitHub 업로드가 선행되어야 한다.
+macOS/Linux에서는 `.venv/bin/python`을 사용한다. 다른 위치의 엔진은 `SAJU_CORE_ROOT` 환경변수로 지정한다. `/start.html`에서 기존 입력 흐름을 사용한다. 서버는 로컬 `127.0.0.1`에만 바인딩되며 `dist`와 API를 같은 출처로 제공한다. 서버 시작 시 Python·의존성·동결 파일·등록 소스 117개를 검증한다. 고정 버전이 다르면 실행을 중단한다. 위 v1.1 커밋은 GitHub에 업로드되어 있다.
 
 `core-engine.lock.json`의 Git 커밋, buildId, manifest SHA-256을 기준으로 실행한다. 서비스는 체크아웃 밖의 lock에서 읽은 해시를 코어의 `SAJU_EXPECTED_SOURCE_SHA256`에 전달한다. 별도 환경변수가 지정되면 lock과 같은 값이어야 한다. `SAJU_CORE_ROOT`나 lock 변경으로 새 엔진을 도입할 때는 별도의 검토가 필요하다. 실행 중 원본 파일 변경도 코어의 요청별 무결성 검사에서 거부한다.
 
@@ -93,6 +93,7 @@ window.addEventListener('studysaju:core-cleared', () => {
 
 - 양력은 `gregorian`, 음력은 `korean_lunisolar`. 입력 날짜와 윤달 여부를 그대로 보내며 음양력 변환과 유효성 판단은 코어에서 수행한다.
 - 남성/여성은 코어의 `luckDirectionBasis: M/F` 입력에 대응한다. 보호자 관계로 성별을 추정하지 않는다.
+- 현재 UI의 schemaVersion 6 시·분 입력은 `mode: exact`와 `HH:mm:00`, `uncertaintySeconds: 0`으로 전달한다. `isUnknown: true`이면 남아 있는 시·분을 무시하고 `mode: unknown`을 전달한다. 이전 schemaVersion 5 입력도 지원한다.
 - 12시진은 `mode: branch`, 자시도 `ziPart: unspecified`, 시간 모름은 `mode: unknown`. 임의의 정각·정오로 바꾸지 않는다.
 - **v1.1 코어는 현재 UI의 시진 입력과 시간 모름 입력으로도 대운을 계산한다.** 시진은 해당 범위, 시간 모름은 현지 생년월일의 하루 전체를 대상으로 한다. 사이트에서는 대운을 재계산하거나 후보 하나를 선택하지 않는다. `daeunSummary`의 `certainty: common`은 입력 범위 전체에 공통이고 `multiple`은 여러 가능성이 있다는 뜻이다. 시작 시점 범위의 `earliestUtc/latestUtc`는 포함되는 최소·최대값이다. 단일 `daeunPillar`가 null이어도 `daeunRange.options[]`에 계산된 대안이 있을 수 있다. `status: ok`가 정확한 생시를 알아냈다는 뜻은 아니다.
 - 국내 지역은 `Asia/Seoul`과 아래 추정 대표 좌표를 전달하며 항상 `precision: region`으로 표시한다. 코어가 `ESTIMATED_LOCATION` 경고를 반환한다. 대표점은 지역의 실제 경계 중심이나 사용자의 실제 출생 좌표가 아니다. 경계 시각에 민감한 정확 계산에는 더 구체적인 위치 수집이 필요하다.
@@ -129,7 +130,7 @@ node --test tests/core-client.test.js tests/free-result.test.js
 
 ## 배포 경계
 
-**이번 작업은 실제 배포하지 않는다. 배포 전 사용자 승인이 필요하다.**
+**사용자가 업로드와 배포를 승인했다. 현재 운영 Python API 서버 준비가 필요하다.**
 
 승인 후 Python 서비스와 `dist`를 같은 HTTPS 출처에 연결해야 한다. 정적 호스팅만으로는 Python 코어를 실행할 수 없다. WSGI 서버의 진입점은 `server.wsgi:application`이다. `server.app`의 개발 서버는 운영 서버가 아니다. 역방향 프록시에서 `/api/saju/v1/*`를 WSGI로, 나머지를 `dist`로 전달하고 외부 요청/응답 본문을 로그에 남기지 않는다. Origin 검사에는 신뢰할 수 있는 프록시의 실제 scheme/Host 전달이 필요하다. 시간 제한·요청량 제한은 운영 서버에서 설정한다.
 

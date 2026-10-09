@@ -30,15 +30,26 @@ export function toCoreSubject(person, id, role = 'person') {
       || birth.year < 1900 || birth.year > 2099 || birth.month < 1 || birth.month > 12
       || birth.day < 1 || birth.day > 31 || typeof birth.isLeapMonth !== 'boolean'
       || !['male','female'].includes(person.gender)) throw new CoreError('INVALID_INPUT');
-  const period = person.birthTime?.period;
-  if (period !== 'unknown' && !Object.hasOwn(BRANCHES, period)) throw new CoreError('INVALID_INPUT');
+  const time = person.birthTime;
+  let birthTime;
+  if (time && Object.hasOwn(time, 'isUnknown')) {
+    if (time.isUnknown === true) birthTime = {mode:'unknown'};
+    else if (time.isUnknown === false && Number.isInteger(time.hour) && time.hour >= 0 && time.hour <= 23
+      && Number.isInteger(time.minute) && time.minute >= 0 && time.minute <= 59) {
+      birthTime = {mode:'exact',value:`${String(time.hour).padStart(2,'0')}:${String(time.minute).padStart(2,'0')}:00`,uncertaintySeconds:0};
+    } else throw new CoreError('INVALID_INPUT');
+  } else {
+    const period = time?.period;
+    if (period !== 'unknown' && !Object.hasOwn(BRANCHES, period)) throw new CoreError('INVALID_INPUT');
+    birthTime = period === 'unknown' ? {mode:'unknown'} : {mode:'branch',value:BRANCHES[period],ziPart:'unspecified'};
+  }
   return {
     id, role,
     birthDate:`${birth.year}-${String(birth.month).padStart(2,'0')}-${String(birth.day).padStart(2,'0')}`,
     calendar:birth.calendar,
     calendarSystem:birth.calendar === 'solar' ? 'gregorian' : 'korean_lunisolar',
     isLeapMonth:birth.isLeapMonth,
-    birthTime:period === 'unknown' ? {mode:'unknown'} : {mode:'branch', value:BRANCHES[period], ziPart:'unspecified'},
+    birthTime,
     birthPlace:{ianaTz:'Asia/Seoul', longitude:coordinates[0], latitude:coordinates[1], precision:'region'},
     luckDirectionBasis:person.gender === 'male' ? 'M' : 'F'
   };
@@ -65,7 +76,7 @@ export async function analyzeCore(request, {signal, fetchImpl = globalThis.fetch
 }
 
 export async function calculateCore(payload, {signal, period = currentPeriod(), fetchImpl} = {}) {
-  if (payload?.schemaVersion !== 5 || !['self','child'].includes(payload.audience)) throw new CoreError('INVALID_INPUT');
+  if (![5,6].includes(payload?.schemaVersion) || !['self','child'].includes(payload.audience)) throw new CoreError('INVALID_INPUT');
   const entries = [['learner', toCoreSubject(payload.learner, 'learner', payload.audience === 'child' ? 'child' : 'person')]];
   if (payload.audience === 'child') entries.push(['guardian', toCoreSubject(payload.guardian, 'guardian', 'person')]);
   const result = {schemaVersion:'studysaju-calculation-v1', period:{...period}, subjects:{}};
