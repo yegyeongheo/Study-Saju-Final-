@@ -11,6 +11,7 @@
   <link rel="preload" as="image" href="landscape.webp">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="intake.css">
+  <link rel="stylesheet" href="report-intro.css">
   <script type="module" src="intake.js"></script>
 </head>
 <body class="intake-page">
@@ -105,6 +106,36 @@
           <button class="primary" type="submit" id="finish-questions" disabled>답변 마치기</button>
           <button class="back-link question-skip" type="button" id="skip-question">건너뛰기</button>
         </form>
+      </div>
+    </section>
+
+    <section class="report-intro" id="report-intro" aria-labelledby="intro-title" hidden>
+      <div class="intro-aurora" aria-hidden="true"></div>
+      <div class="intro-shell">
+        <header class="intro-header">
+          <p class="intro-label" id="intro-label"></p>
+          <h1 id="intro-title" tabindex="-1"></h1>
+          <button class="intro-skip" id="intro-skip" type="button">건너뛰기</button>
+        </header>
+        <div class="intro-center">
+          <div class="intro-copy" id="intro-copy" aria-live="polite" aria-atomic="true">
+            <h2 id="intro-main"></h2>
+            <p id="intro-support"></p>
+          </div>
+          <button class="primary intro-open" id="intro-open" type="button" hidden>운명 비책 열어보기</button>
+        </div>
+        <footer class="intro-footer">
+          <ol class="intro-dots" id="intro-dots" aria-label="인트로 진행 상황">
+            <li aria-label="1 / 4"><span aria-hidden="true"></span></li>
+            <li aria-label="2 / 4"><span aria-hidden="true"></span></li>
+            <li aria-label="3 / 4"><span aria-hidden="true"></span></li>
+            <li aria-label="4 / 4"><span aria-hidden="true"></span></li>
+          </ol>
+          <div class="intro-controls" id="intro-controls">
+            <button id="intro-next" type="button">화면을 탭하면 다음으로</button>
+            <button id="intro-pause" type="button" aria-pressed="false">일시정지</button>
+          </div>
+        </footer>
       </div>
     </section>
 

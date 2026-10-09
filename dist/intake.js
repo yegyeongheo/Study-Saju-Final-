@@ -1,4 +1,5 @@
 import {createConsentController} from './consent.js';
+import {createReportIntro} from './report-intro.js';
 import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPersonalization} from './questionnaire.js';
 
 (() => {
@@ -25,13 +26,19 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   const form = document.getElementById('intake-form');
   const consent = createConsentController();
   const sections = Object.fromEntries([...document.querySelectorAll('[data-person]')].map(el => [el.dataset.person, el]));
-  const views = {choose:document.getElementById('choose-view'), input:document.getElementById('details-view'), review:document.getElementById('review-view'), questions:document.getElementById('questions-view')};
-  const headings = {choose:document.getElementById('choose-title'), input:document.getElementById('details-title'), review:document.getElementById('review-title'), questions:document.getElementById('question-title')};
+  const views = {choose:document.getElementById('choose-view'), input:document.getElementById('details-view'), review:document.getElementById('review-view'), questions:document.getElementById('questions-view'), intro:document.getElementById('report-intro')};
+  const headings = {choose:document.getElementById('choose-title'), input:document.getElementById('details-title'), review:document.getElementById('review-title'), questions:document.getElementById('question-title'), intro:document.getElementById('intro-title')};
   const studyDrafts = {child:'', self:''};
   const answerDrafts = {child:createAnswers(), self:createAnswers()};
   let questionIndex = 0;
   let audience = null;
   let lastPayload = null;
+  const intro = createReportIntro({onOpen:() => {
+    if (!lastPayload?.personalization || !consent.isReady()) { go('input'); return; }
+    go('review');
+    // The app can navigate to its actual free report at this presentation boundary.
+    window.dispatchEvent(new CustomEvent('studysaju:intro-complete', {detail:lastPayload}));
+  }});
 
   const field = (section, key) => section.querySelector(`[data-field="${key}"]`);
   const calendar = section => section.querySelector('[data-field="calendar"]:checked').value;
@@ -106,18 +113,21 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   }
   function showView(view, moveFocus = true) {
     consent.closeDialog();
+    intro.stop();
     Object.entries(views).forEach(([key, el]) => el.hidden = key !== view);
     document.body.classList.toggle('is-form', view !== 'choose');
+    document.body.classList.toggle('is-intro', view === 'intro');
     if (moveFocus) {
       window.scrollTo({top:0, behavior:'instant'});
       headings[view].focus({preventScroll:true});
     }
+    if (view === 'intro') intro.start(audience);
   }
   function go(view, step = 0) {
-    if ((view === 'questions' || view === 'review') && !consent.isReady()) view = 'input';
+    if (['questions', 'intro', 'review'].includes(view) && !consent.isReady()) view = 'input';
     if (view === 'questions') renderQuestion(step);
     if (view === 'review') renderReview();
-    const hash = view === 'choose' ? '' : view === 'input' ? '#information' : view === 'questions' ? '#question-' + (questionIndex + 1) : '#check';
+    const hash = view === 'choose' ? '' : view === 'input' ? '#information' : view === 'questions' ? '#question-' + (questionIndex + 1) : view === 'intro' ? '#intro' : '#check';
     history.pushState({view, audience, step:view === 'questions' ? questionIndex : null}, '', location.pathname + hash);
     showView(view);
   }
@@ -166,16 +176,21 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     if (state.audience) selectAudience(state.audience);
     const hasInput = lastPayload && lastPayload.audience === audience && consent.isReady();
     let view = 'choose';
-    if (audience && ['input', 'questions', 'review'].includes(state.view)) view = 'input';
+    if (audience && ['input', 'questions', 'intro', 'review'].includes(state.view)) view = 'input';
     if (state.view === 'questions' && hasInput) {
       view = 'questions';
       renderQuestion(state.step || 0);
     }
-    if (state.view === 'review' && hasInput) {
-      view = lastPayload.personalization ? 'review' : 'questions';
-      if (view === 'review') renderReview(); else renderQuestion(2);
+    if (['intro', 'review'].includes(state.view) && hasInput) {
+      view = lastPayload.personalization ? state.view : 'questions';
+      if (view === 'review') renderReview(); else if (view === 'questions') renderQuestion(2);
     }
     showView(view);
+  });
+  window.addEventListener('pageshow', event => {
+    if (event.persisted && !views.intro.hidden && lastPayload?.personalization) {
+      if (consent.isReady()) intro.start(audience); else go('input');
+    }
   });
 
   function readPerson(key) {
@@ -307,8 +322,9 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     const personalization = buildPersonalization(audience, answers);
     transitionQuestion(() => {
       lastPayload.personalization = personalization;
-      go('review');
-      // The app should start its free interpretation only after this completed event.
+      intro.reset(audience);
+      go('intro');
+      // Input is ready for report preparation; navigation waits for intro-complete.
       window.dispatchEvent(new CustomEvent('studysaju:intake-ready', {detail:lastPayload}));
     });
   }
