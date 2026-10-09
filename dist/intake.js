@@ -24,6 +24,8 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   let confirmedPayload = null;
   let introFinishedPayload = null;
   const freeResult = createFreeResultController();
+  // Calculation data stays in page memory and is cleared when input changes.
+  window.studySajuCore = Object.freeze({getResult:() => freeResult.getCalculation()});
   const intro = createReportIntro({onOpen:() => {
     if (!lastPayload?.personalization || !consent.isReady()) { go('input'); return; }
     if (confirmedPayload !== lastPayload) { go('review'); return; }

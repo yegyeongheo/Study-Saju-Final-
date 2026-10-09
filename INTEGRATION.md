@@ -174,14 +174,14 @@ v5.8부터 개인화 질문 3을 마치거나 건너뛰면 먼저 start.html#che
 
 ### 실제 해석 엔진 어댑터
 
-free-result.js를 함께 옮기세요. 앱에서 intake.js 초기화 전에 window.studySajuAnalyze 함수를 제공하면 확인 화면의 분석 CTA를 누를 때 한 번 호출합니다. 함수가 없으면 네트워크 호출 없이 “무료 해석 연결 전이에요.” 안내를 표시합니다.
+2026-10-09 코어 연결 이후에는 `free-result.js`와 `core-client.js`를 함께 옮기세요. 분석 CTA는 먼저 원본 코어 계산 API를 호출합니다. `window.studySajuAnalyze`는 계산 결과를 해석하는 별도 확장 지점이며, 없으면 계산 완료/해석 준비 중 안내를 표시합니다. 이번 작업에는 유형 분류·해석·리포트 구현이 없습니다. 현재 실행 및 데이터 계약은 [CORE_API.md](CORE_API.md)를 우선 참조하세요.
 
 ```js
-window.studySajuAnalyze = async (payload, {signal}) => {
-  // 앱의 인증·검증을 거쳐 실제 코어/해석 서비스에 연결합니다.
+window.studySajuAnalyze = async (payload, {signal, calculation}) => {
+  // 별도 개발할 해석 서비스에서 이미 받은 원본 calculation을 사용합니다.
   // 반환 형태: {typeName: string, headline: string, summary: string, strengths?: string[]}
   // 여기에는 실제 분석 결과만 반환하고, signal로 취소를 전달하세요.
-  return analyzeWithYourReportEngine(payload, {signal});
+  return analyzeWithYourReportEngine(payload, {signal, calculation});
 };
 ```
 
@@ -189,11 +189,9 @@ window.studySajuAnalyze = async (payload, {signal}) => {
 
 분석 요청에는 원본 입력의 복사본을 전달합니다. 인트로 재생 동안 응답을 준비하고 황금 안개가 끝난 뒤 결과를 공개합니다. 응답을 기다리는 경우 준비 중 화면, 실패·형식 오류·30초 초과 시 재시도 버튼을 표시합니다. 정보 수정·재요청·페이지 이탈 시 이전 요청을 취소하고 늦게 도착한 응답은 무시합니다. API가 AbortSignal을 지원하지 않아도 이전 결과를 새 정보에 표시하지 않습니다.
 
-이 사본은 프런트엔드 UI입니다. 실제 저장·전송을 연결하기 전에는 앱의 개인정보 처리 정책과 동의 증적·법정대리인 확인 절차를 함께 연결해야 합니다. 기존 draft 동의 객체를 확인 완료 증적으로 취급하지 마세요.
-
-
+현재 사본에는 코어 HTTP 연결부가 포함되어 있으며 실제 배포는 하지 않았습니다. 운영 전에는 앱의 개인정보 처리 정책과 동의 증적·법정대리인 확인 절차를 별도로 연결해야 합니다. 기존 draft 동의 객체를 확인 완료 증적으로 취급하지 마세요.
 ## v5.9 정확한 생시와 시간 모름
 
 기존 12시진 드롭다운을 시·분 드롭다운으로 교체했습니다. “태어난 시간 모름”을 체크하면 해당 사람의 시·분만 비활성화되며, 체크 해제·뒤로 가기·정보 수정에서는 작성 중 선택을 보존합니다. 확인 화면에는 “14시 05분” 또는 “시간 모름”으로 표시합니다. 개인정보 안내의 수집 항목도 시·분 또는 시간 모름으로 갱신했습니다.
 
-엔진 어댑터에는 schemaVersion 6 데이터를 전달합니다. 시간 모름일 때 UI에 남아 있는 이전 시·분은 payload에 포함하지 않습니다. 이 변경은 입력·전달 구조만 바꾸며, 대운 계산이나 실제 해석 엔진을 새로 연결하지 않습니다. 코어에서 모름 입력을 지원하지 않는 계산은 별도 지원 여부를 확인해야 합니다.
+엔진 어댑터에는 schemaVersion 6 데이터를 전달합니다. 시간 모름일 때 UI에 남아 있는 이전 시·분은 payload에 포함하지 않습니다. 코어 클라이언트가 정확한 시·분은 exact로, 모름은 unknown으로 전달합니다. 이전 schemaVersion 5 시진 입력도 범위 입력으로 지원합니다. 계산은 코어에서만 수행합니다.

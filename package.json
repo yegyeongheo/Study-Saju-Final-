@@ -1,0 +1,6 @@
+{
+  "name": "study-saju",
+  "private": true,
+  "type": "module",
+  "scripts": {"test": "node --test tests/core-client.test.js tests/free-result.test.js"}
+}
