@@ -9,6 +9,7 @@ import sys
 from threading import BoundedSemaphore
 from urllib.parse import urlsplit
 from wsgiref.simple_server import WSGIRequestHandler, make_server
+from .security import ApiGuard
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK = json.loads((ROOT / "core-engine.lock.json").read_text(encoding="utf-8"))
@@ -27,6 +28,7 @@ class CoreEngine:
         if expected != LOCK["sourceManifestSha256"]:
             raise RuntimeError("SAJU_EXPECTED_SOURCE_SHA256 differs from core-engine.lock.json")
         self.env = {**os.environ, "SAJU_CORE_ROOT": str(self.root), "SAJU_EXPECTED_SOURCE_SHA256": expected}
+        self.env.pop('SAJU_API_TOKEN', None)
         self.slots = BoundedSemaphore(2)
         self.identity = self._run(verify=True)
         if self.identity["buildId"] != LOCK["buildId"]:
@@ -59,6 +61,8 @@ class CoreEngine:
 
 
 def create_app(engine=None, *, serve_static=False):
+    # Only the explicit loopback preview bypasses server authentication.
+    guard = None if serve_static else ApiGuard(os.environ.get('SAJU_API_TOKEN'))
     engine = engine or CoreEngine()
     dist = (ROOT / "dist").resolve()
 
@@ -73,10 +77,16 @@ def create_app(engine=None, *, serve_static=False):
         path, method = environ.get("PATH_INFO", ""), environ["REQUEST_METHOD"]
         try:
             if path == "/api/saju/v1/health" and method == "GET":
-                return respond("200 OK", {"status": "ok", "engine": engine.identity})
+                return respond("200 OK", {"status": "ok", **({"engine": engine.identity} if serve_static else {})})
             if path == "/api/saju/v1/analyze":
                 if method != "POST":
                     return respond("405 Method Not Allowed", {"error": {"code": "METHOD_NOT_ALLOWED"}}, extra=[("Allow", "POST")])
+                if guard:
+                    failure = guard.check(environ)
+                    if failure:
+                        status, code = failure
+                        return respond(status, {"status":"error", "error":{"code":code}},
+                                       extra=[("Retry-After", "60")] if code == 'RATE_LIMITED' else [])
                 # Same-origin browser transport, without public cross-origin CORS.
                 origin = environ.get("HTTP_ORIGIN")
                 if origin:
