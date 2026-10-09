@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#20243d">
+  <title>학습 비책 시작하기 — 공부사주</title>
+  <meta name="description" content="자녀 또는 나를 위한 학습 비책. 태어난 날과 지금의 공부를 알려주세요.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2320243d'/%3E%3Ctext x='20' y='28' text-anchor='middle' fill='%23c6b8ea' font-size='27'%3E공%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap">
+  <link rel="preload" as="image" href="landscape.webp">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="intake.css">
+  <script type="module" src="intake.js"></script>
+</head>
+<body class="intake-page">
+  <div class="intake-landscape" aria-hidden="true"></div>
+  <header class="intake-header"><a class="brand" href="index.html">공부<span>사주</span></a></header>
+  <main id="intake-main">
+    <section class="intake-view choose-view" id="choose-view" aria-labelledby="choose-title">
+      <div class="choice-content">
+        <h1 id="choose-title" tabindex="-1">누구의 학습 비책을<br><em>열어볼까요?</em></h1>
+        <div class="audience-choices">
+          <button type="button" class="audience-choice" data-choice="child">자녀</button>
+          <button type="button" class="audience-choice" data-choice="self">본인</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="intake-view details-view" id="details-view" aria-labelledby="details-title" hidden>
+      <button class="back-link" type="button" id="change-audience"><span aria-hidden="true">←</span> 대상 다시 선택</button>
+      <div class="form-intro">
+        <p class="eyebrow" id="audience-caption">우리 아이의 학습 비책</p>
+        <h1 id="details-title" tabindex="-1">아이의 이야기를<br><em>들려주세요.</em></h1>
+        <p>태어난 날과 지금의 공부에서<br>비책의 첫 장이 시작됩니다.</p>
+      </div>
+      <form id="intake-form" autocomplete="off">
+        <fieldset class="person-section" id="child-person" data-person="child" disabled>
+          <legend><span class="form-number">01</span>아이 사주 입력하기</legend>
+          <div class="person-fields"></div>
+        </fieldset>
+        <fieldset class="person-section" id="self-person" data-person="self" hidden disabled>
+          <legend><span class="form-number">01</span>내 사주 입력하기</legend>
+          <div class="person-fields"></div>
+        </fieldset>
+        <fieldset class="person-section" id="guardian-person" data-person="guardian" disabled>
+          <legend><span class="form-number">02</span>내 사주 입력하기</legend>
+          <fieldset class="relation-field">
+            <legend class="field-label">아이와의 관계</legend>
+            <div class="check-options">
+              <label><input type="radio" name="guardian-relationship" value="father" required><span>부</span></label>
+              <label><input type="radio" name="guardian-relationship" value="mother" required><span>모</span></label>
+              <label><input type="radio" name="guardian-relationship" value="grandparent" required><span>조부모</span></label>
+            </div>
+          </fieldset>
+          <div class="person-fields"></div>
+        </fieldset>
+        <fieldset class="study-section">
+          <legend>무슨 공부를 하고 있나요?</legend>
+          <p class="field-hint">지금 가장 집중하고 있는 하나를 골라주세요.</p>
+          <div class="study-choices">
+            <label><input type="radio" name="study" value="kindergarten" required><span>유치원<i aria-hidden="true"></i></span></label>
+            <label><input type="radio" name="study" value="school" required><span>학교 공부·내신<i aria-hidden="true"></i></span></label>
+            <label><input type="radio" name="study" value="college" required><span>대학 입시<i aria-hidden="true"></i></span></label>
+            <label><input type="radio" name="study" value="civil-service" required><span>공무원 시험<i aria-hidden="true"></i></span></label>
+            <label><input type="radio" name="study" value="professional" required><span>전문직 시험<i aria-hidden="true"></i></span></label>
+            <label><input type="radio" name="study" value="other" required><span>자격증·어학·기타<i aria-hidden="true"></i></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="consent-section" id="privacy-consents" aria-describedby="consent-description">
+          <legend>개인정보 수집 및 이용 동의</legend>
+          <p class="consent-description" id="consent-description">정확한 사주 분석을 위해 입력하신 정보를 사용합니다.</p>
+          <div class="consent-row">
+            <label class="consent-check" for="consent-collection"><input type="checkbox" id="consent-collection" name="consent-collection" required disabled><span><strong>[필수]</strong> 개인정보 수집 및 이용에 동의합니다.</span></label>
+            <button class="consent-details" type="button" data-consent-details="collection" aria-haspopup="dialog" aria-controls="consent-dialog" aria-label="개인정보 수집 및 이용 동의 자세히 보기">자세히 보기</button>
+          </div>
+          <div class="consent-row" id="guardian-consent-row" hidden>
+            <label class="consent-check" for="consent-guardian"><input type="checkbox" id="consent-guardian" name="consent-guardian" disabled><span><strong>[필수]</strong> 자녀의 법정대리인으로서 개인정보 처리에 동의합니다.</span></label>
+            <button class="consent-details" type="button" data-consent-details="guardian" aria-haspopup="dialog" aria-controls="consent-dialog" aria-label="법정대리인 개인정보 처리 동의 자세히 보기">자세히 보기</button>
+          </div>
+          <p class="consent-hint" id="consent-hint">필수 항목에 모두 동의하면 다음으로 진행할 수 있어요.</p>
+        </fieldset>
+        <div class="form-finish">
+          <button class="primary intake-submit" id="intake-next" type="submit" aria-describedby="consent-hint" disabled>다음 <svg class="mystical-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 5h4"/><path d="M20 3v4"/><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg></button>
+          <p class="preview-note">입력·질문 화면 미리보기 · 실제 풀이와 결제는 진행되지 않아요.</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="intake-view questions-view" id="questions-view" aria-labelledby="question-title" hidden>
+      <div class="question-navigation">
+        <button class="back-link" type="button" id="question-back">입력 정보 수정</button>
+        <p class="question-progress" id="question-progress" aria-live="polite">질문 1 / 3</p>
+      </div>
+      <div class="question-stage" id="question-stage">
+        <p class="personalization-intro" id="personalization-intro"></p>
+        <h1 id="question-title" tabindex="-1"></h1>
+        <p class="question-description" id="question-description"></p>
+        <div class="question-options" id="question-options" role="group" aria-labelledby="question-title" aria-describedby="question-description"></div>
+        <form id="personal-question-form" class="personal-question-form" hidden>
+          <label class="visually-hidden" for="personal-question">리포트 마지막 장에서 답변받고 싶은 질문</label>
+          <textarea id="personal-question" rows="5" aria-describedby="question-description question-optional question-count question-limit" autocomplete="off"></textarea>
+          <div class="question-input-meta"><span id="question-optional">선택 입력 · 건너뛰기 가능</span><output id="question-count" for="personal-question">0/150자</output></div>
+          <p class="question-limit" id="question-limit" role="status" hidden>질문은 150자까지 입력할 수 있어요.</p>
+          <button class="primary" type="submit" id="finish-questions" disabled>답변 마치기</button>
+          <button class="back-link question-skip" type="button" id="skip-question">건너뛰기</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="intake-view review-view" id="review-view" aria-labelledby="review-title" hidden>
+      <p class="eyebrow">비책을 위한 첫걸음</p>
+      <h1 id="review-title" tabindex="-1">입력한 정보를<br><em>확인해 주세요.</em></h1>
+      <div id="review-people" class="review-people"></div>
+      <div class="review-study"><span>지금 집중하는 공부</span><strong id="review-study"></strong></div>
+      <section class="review-personalization" aria-labelledby="review-answers-title">
+        <h2 id="review-answers-title">비책에 담을 이야기</h2>
+        <dl id="review-answers"></dl>
+        <button class="back-link" type="button" id="edit-answers">답변 수정하기</button>
+      </section>
+      <p class="preview-note">현재는 입력·질문 화면 미리보기예요.<br>실제 무료 해석과 마지막 장의 답변은 아직 제공되지 않아요.</p>
+      <button class="primary" type="button" id="edit-information">입력 내용 수정하기</button>
+      <a class="back-link home-link" href="index.html#report">리포트 예시 다시 보기 <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+  <dialog class="consent-dialog" id="consent-dialog" aria-labelledby="consent-dialog-title" aria-describedby="consent-dialog-intro">
+    <div class="consent-dialog-header">
+      <h2 id="consent-dialog-title" tabindex="-1">개인정보 수집 및 이용 동의</h2>
+      <button class="consent-close" type="button" data-consent-close aria-label="개인정보 동의 안내 닫기">닫기</button>
+    </div>
+    <div class="consent-dialog-scroll" id="consent-dialog-scroll">
+      <p class="consent-draft-label" id="consent-policy-status">정책 확정 전 안내</p>
+      <p class="consent-dialog-intro" id="consent-dialog-intro"></p>
+      <dl id="consent-dialog-content"></dl>
+    </div>
+    <div class="consent-dialog-footer"><button class="primary" type="button" data-consent-close>확인</button></div>
+  </dialog>
+  <noscript><p class="noscript-note">입력 화면을 이용하려면 브라우저에서 자바스크립트를 켜주세요.</p></noscript>
+  <template id="person-fields-template">
+    <div class="form-field">
+      <label class="field-label" data-label="name">이름</label>
+      <input class="text-input" type="text" data-field="name" placeholder="이름을 입력해 주세요" maxlength="40" required>
+    </div>
+    <fieldset class="form-field birthdate-field">
+      <legend class="field-label">생년월일</legend>
+      <div class="date-fields">
+        <select data-field="year" data-caption="출생 연도" required><option value="">연도</option></select>
+        <select data-field="month" data-caption="출생 월" required><option value="">월</option></select>
+        <select data-field="day" data-caption="출생 일" required><option value="">일</option></select>
+      </div>
+      <div class="check-options calendar-options" role="group" aria-label="달력 기준">
+        <label><input type="radio" data-field="calendar" value="solar" checked><span>양력</span></label>
+        <label><input type="radio" data-field="calendar" value="lunar"><span>음력</span></label>
+        <label class="leap-option"><input type="checkbox" data-field="leap" disabled><span>윤달</span></label>
+      </div>
+      <p class="field-hint lunar-hint" hidden>음력 생일을 그대로 선택해 주세요. 윤달인 경우에만 체크해 주세요.</p>
+    </fieldset>
+    <div class="form-field">
+      <label class="field-label" data-label="time">태어난 시간</label>
+      <select data-field="time" required><option value="">생시를 선택해 주세요</option></select>
+    </div>
+    <div class="form-field">
+      <label class="field-label" data-label="region">태어난 지역</label>
+      <select data-field="region" required><option value="">출생 지역을 선택해 주세요</option></select>
+    </div>
+  </template>
+</body>
+</html>
