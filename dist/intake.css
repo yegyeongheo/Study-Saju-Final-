@@ -46,6 +46,9 @@
 .intake-page select:has(option[value='']:checked){color:#aaa7bb}
 .text-input:focus,.intake-page select:focus{outline:2px solid #c6b8ea80;outline-offset:3px;border-color:var(--lav);background-color:#c6b8ea0d}
 .date-fields{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:9px}
+.time-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.intake-page .time-fields select:disabled{opacity:.4;cursor:not-allowed;background-color:#ffffff03}
+.time-options{margin-top:8px}
 .date-fields select{padding-left:8px;padding-right:29px;background-position:right 9px center}
 .check-options{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px}
 .check-options label{display:inline-flex;min-height:44px;align-items:center;gap:9px;cursor:pointer;font-size:14px}

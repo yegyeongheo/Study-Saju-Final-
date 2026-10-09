@@ -213,10 +213,17 @@
       </div>
       <p class="field-hint lunar-hint" hidden>음력 생일을 그대로 선택해 주세요. 윤달인 경우에만 체크해 주세요.</p>
     </fieldset>
-    <div class="form-field">
-      <label class="field-label" data-label="time">태어난 시간</label>
-      <select data-field="time" required><option value="">생시를 선택해 주세요</option></select>
-    </div>
+    <fieldset class="form-field birthtime-field">
+      <legend class="field-label">태어난 시간</legend>
+      <div class="time-fields">
+        <select data-field="hour" data-caption="태어난 시 (24시간 기준)" required><option value="">시</option></select>
+        <select data-field="minute" data-caption="태어난 분" required><option value="">분</option></select>
+      </div>
+      <p class="field-hint">24시간 기준 · 오후 1시는 13시예요.</p>
+      <div class="check-options time-options">
+        <label><input type="checkbox" data-field="timeUnknown" data-caption="태어난 시간 모름"><span>태어난 시간 모름</span></label>
+      </div>
+    </fieldset>
     <div class="form-field">
       <label class="field-label" data-label="region">태어난 지역</label>
       <select data-field="region" required><option value="">출생 지역을 선택해 주세요</option></select>
