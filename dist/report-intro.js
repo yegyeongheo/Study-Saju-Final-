@@ -26,58 +26,86 @@ export const REPORT_INTROS = {
 
 export const INTRO_TIMING = {fadeIn:1000, hold:2500, fadeOut:1000, opening:1700};
 
-// Fine gold dust follows three rotating spiral arms, then gathers and fades.
-// The canvas runs only during the CTA transition and holds no user data.
-export function createSparkVortex(canvas) {
+// Two translucent, textured currents wrap around the page and disperse.
+// Soft canvas brushes keep this abstract light effect independent of image assets.
+export function createSpiritualEnergy(canvas) {
   const ctx = canvas.getContext?.('2d');
   if (!ctx) return {play(){}, pause(){}, resume(){}, stop(){}};
   let frame = 0, running = false, paused = false, elapsed = 0, lastTime = 0;
-  let width = 0, height = 0, particles = [];
+  let lastPaint = -Infinity, width = 0, height = 0, brushes = null;
   const smooth = (a, b, value) => {
     const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
     return t * t * (3 - 2 * t);
   };
+  function makeBrush(rgb) {
+    const brush = document.createElement('canvas');
+    brush.width = brush.height = 128;
+    const surface = brush.getContext('2d');
+    const pixels = surface.createImageData(128, 128);
+    let seed = 571 + rgb[0] * 13;
+    const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    const fields = [4, 8, 16, 32].map(cells => ({cells, values:Array.from({length:(cells + 1) ** 2}, random)}));
+    const noise = (field, x, y) => {
+      const px = x * field.cells, py = y * field.cells;
+      const ix = Math.floor(px), iy = Math.floor(py);
+      const tx = px - ix, ty = py - iy;
+      const sx = tx * tx * (3 - 2 * tx), sy = ty * ty * (3 - 2 * ty);
+      const at = (dx, dy) => field.values[(iy + dy) * (field.cells + 1) + ix + dx];
+      return (at(0, 0) * (1 - sx) + at(1, 0) * sx) * (1 - sy)
+        + (at(0, 1) * (1 - sx) + at(1, 1) * sx) * sy;
+    };
+    for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
+      const nx = (x - 63.5) / 63.5, ny = (y - 63.5) / 63.5;
+      const r2 = nx * nx + ny * ny;
+      const cloud = fields.reduce((value, field, i) => value + noise(field, x / 128, y / 128) * [ .52, .27, .14, .07 ][i], 0);
+      const alpha = Math.pow(Math.max(0, 1 - r2), 1.7) * Math.pow(cloud, 1.55);
+      const offset = (y * 128 + x) * 4;
+      pixels.data[offset] = rgb[0]; pixels.data[offset + 1] = rgb[1];
+      pixels.data[offset + 2] = rgb[2]; pixels.data[offset + 3] = Math.round(alpha * 255);
+    }
+    surface.putImageData(pixels, 0, 0);
+    return brush;
+  }
   function resize() {
     if (!running) return;
     const rect = canvas.parentElement.getBoundingClientRect();
     width = rect.width; height = rect.height;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function draw(progress) {
     ctx.clearRect(0, 0, width, height);
-    const fade = smooth(0, .17, progress) * (1 - smooth(.78, 1, progress));
-    const coil = 1 - .87 * smooth(.4, 1, progress);
-    const radius = Math.min(width * .49, height * .46, 400);
-    const rotation = progress * 9.4;
-    ctx.globalCompositeOperation = 'lighter';
-    for (const particle of particles) {
-      const angle = particle.arm * Math.PI * 2 / 3 + particle.position * 6.2 + rotation;
-      const r = (18 + radius * particle.position) * coil;
-      const drift = particle.drift * (1 - smooth(.45, 1, progress));
-      const x = width / 2 + Math.cos(angle) * r + drift;
-      const y = height * .51 + Math.sin(angle) * r * .78 + drift * .6;
-      const twinkle = .55 + .45 * Math.pow(Math.sin(particle.phase + progress * 11), 4);
-      const size = particle.size * (.75 + twinkle * .45);
-      ctx.globalAlpha = fade * twinkle * particle.light;
-      ctx.fillStyle = particle.tint;
-      ctx.shadowBlur = particle.glint ? 7 : 0;
-      ctx.shadowColor = '#f1c875';
-      ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
-      // Short tangential traces make the direction of the spiral visible.
-      ctx.globalAlpha *= .35;
-      ctx.lineWidth = Math.max(.45, size * .5); ctx.strokeStyle = particle.tint;
-      ctx.beginPath(); ctx.moveTo(x, y);
-      ctx.lineTo(width / 2 + Math.cos(angle - .055) * r + drift,
-        height * .51 + Math.sin(angle - .055) * r * .78 + drift * .6);
-      ctx.stroke();
-      if (particle.glint) {
-        ctx.globalAlpha = fade * Math.pow(twinkle, 2) * .85;
-        ctx.strokeStyle = '#fff3cc'; ctx.lineWidth = .65;
-        ctx.beginPath(); ctx.moveTo(x - size * 3.2, y); ctx.lineTo(x + size * 3.2, y);
-        ctx.moveTo(x, y - size * 3.2); ctx.lineTo(x, y + size * 3.2); ctx.stroke();
+    const fade = smooth(0, .22, progress) * (1 - smooth(.67, 1, progress));
+    const time = progress * 1.9;
+    const spread = 1 + .32 * smooth(.55, 1, progress);
+    const rx = Math.min(width * .42, 370) * spread;
+    const ry = Math.min(height * .245, width * .43, 250) * spread;
+    const scale = Math.min(width, height, 760);
+    const count = width < 600 ? 48 : 68;
+    ctx.globalCompositeOperation = 'screen';
+    for (let stream = 0; stream < 2; stream++) {
+      for (let i = 0; i < count; i++) {
+        const u = i / (count - 1);
+        const taper = Math.pow(Math.sin(Math.PI * u), .75);
+        const angle = u * Math.PI * 1.22 + time + stream * Math.PI;
+        const breathe = .72 + .23 * Math.sin(u * Math.PI * 1.4 + stream * .9)
+          + .07 * Math.sin(u * 9 - time * 2 + stream);
+        const x = width / 2 + Math.cos(angle) * rx * breathe
+          + Math.sin(u * 14 + time * 2) * scale * .018;
+        const y = height * .52 + Math.sin(angle) * ry
+          + Math.sin(u * 11 - time + stream) * scale * .045;
+        const size = scale * (.115 + .065 * Math.sin(u * 7 + time) ** 2);
+        ctx.save(); ctx.translate(x, y); ctx.rotate(angle + time * .3 + u * 7);
+        // A wide veil surrounds the denser, irregular inner fold of each current.
+        ctx.globalAlpha = fade * taper * .21;
+        ctx.drawImage(brushes[stream][0], -size * 1.25, -size * .85, size * 2.5, size * 1.7);
+        ctx.globalAlpha = fade * taper * .43;
+        ctx.drawImage(brushes[stream][0], -size * .65, -size * .4, size * 1.3, size * .8);
+        ctx.globalAlpha = fade * taper * .11;
+        const curl = Math.sin(u * 19 + time * 2) * size * .13;
+        ctx.drawImage(brushes[stream][1], -size * .55, -size * .13 + curl, size * 1.1, size * .26);
+        ctx.restore();
       }
     }
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
@@ -86,7 +114,9 @@ export function createSparkVortex(canvas) {
     frame = 0;
     if (!running || paused) return;
     elapsed += now - lastTime; lastTime = now;
-    draw(Math.min(1, elapsed / INTRO_TIMING.opening));
+    if (now - lastPaint >= 1000 / 30 || elapsed >= INTRO_TIMING.opening) {
+      draw(Math.min(1, elapsed / INTRO_TIMING.opening)); lastPaint = now;
+    }
     if (elapsed < INTRO_TIMING.opening) frame = window.requestAnimationFrame(tick);
     else stop();
   }
@@ -96,13 +126,11 @@ export function createSparkVortex(canvas) {
     window.removeEventListener('resize', resize);
   }
   function play() {
-    stop(); running = true; canvas.hidden = false; elapsed = 0; resize();
-    const colors = ['#d9a44d', '#edc76f', '#f8dc96', '#ffefbf'];
-    particles = Array.from({length:width < 600 ? 300 : 460}, (_, i) => ({
-      arm:i % 3, position:Math.random(), drift:(Math.random() - .5) * 26,
-      phase:Math.random() * Math.PI * 2, size:.5 + Math.random() * 1.15,
-      light:.8 + Math.random() * .2, tint:colors[i % colors.length], glint:i % 8 === 0
-    }));
+    stop(); running = true; canvas.hidden = false; elapsed = 0; lastPaint = -Infinity; resize();
+    brushes ||= [
+      [makeBrush([69, 151, 239]), makeBrush([174, 223, 255])],
+      [makeBrush([234, 174, 73]), makeBrush([255, 225, 161])]
+    ];
     lastTime = performance.now();
     window.addEventListener('resize', resize);
     frame = window.requestAnimationFrame(tick);
@@ -127,7 +155,7 @@ export function createReportIntro({onOpen}) {
   const next = el('intro-next');
   const dots = [...el('intro-dots').children];
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const sparkles = createSparkVortex(el('intro-sparkles'));
+  const energy = createSpiritualEnergy(el('intro-energy'));
   const snapshots = {};
   let audience = null, index = 0, phase = 'idle', active = false, userPaused = false;
   let timer = 0, due = 0, remaining = 0, action = null, animation = null;
@@ -153,10 +181,10 @@ export function createReportIntro({onOpen}) {
     if (isPaused()) {
       if (timer) { remaining = Math.max(0, due - performance.now()); clearTimeout(timer); timer = 0; }
       animation?.pause();
-      sparkles.pause();
+      energy.pause();
     } else {
       animation?.play();
-      sparkles.resume();
+      energy.resume();
       if (!timer) runClock();
     }
     root.classList.toggle('is-paused', isPaused());
@@ -235,7 +263,7 @@ export function createReportIntro({onOpen}) {
   }
   function stop() {
     active = false; phase = 'idle'; clearClock(); animation?.cancel(); animation = null;
-    sparkles.stop();
+    energy.stop();
     root.classList.remove('is-opening', 'is-paused');
     root.removeAttribute('aria-busy');
     open.disabled = false; skip.disabled = false;
@@ -268,7 +296,7 @@ export function createReportIntro({onOpen}) {
     phase = 'opening'; clearClock(); animation?.cancel(); animation = null;
     open.disabled = true; skip.disabled = true;
     root.setAttribute('aria-busy', 'true'); root.classList.add('is-opening');
-    if (!motion.matches) { sparkles.play(); if (isPaused()) sparkles.pause(); }
+    if (!motion.matches) { energy.play(); if (isPaused()) energy.pause(); }
     schedule(motion.matches ? 0 : INTRO_TIMING.opening, () => {
       stop(); onOpen();
     });
