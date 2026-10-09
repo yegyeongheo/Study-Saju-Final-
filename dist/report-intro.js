@@ -26,6 +26,95 @@ export const REPORT_INTROS = {
 
 export const INTRO_TIMING = {fadeIn:1000, hold:2500, fadeOut:1000, opening:1700};
 
+// Fine gold dust follows three rotating spiral arms, then gathers and fades.
+// The canvas runs only during the CTA transition and holds no user data.
+export function createSparkVortex(canvas) {
+  const ctx = canvas.getContext?.('2d');
+  if (!ctx) return {play(){}, pause(){}, resume(){}, stop(){}};
+  let frame = 0, running = false, paused = false, elapsed = 0, lastTime = 0;
+  let width = 0, height = 0, particles = [];
+  const smooth = (a, b, value) => {
+    const t = Math.max(0, Math.min(1, (value - a) / (b - a)));
+    return t * t * (3 - 2 * t);
+  };
+  function resize() {
+    if (!running) return;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    width = rect.width; height = rect.height;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function draw(progress) {
+    ctx.clearRect(0, 0, width, height);
+    const fade = smooth(0, .17, progress) * (1 - smooth(.78, 1, progress));
+    const coil = 1 - .87 * smooth(.4, 1, progress);
+    const radius = Math.min(width * .49, height * .46, 400);
+    const rotation = progress * 9.4;
+    ctx.globalCompositeOperation = 'lighter';
+    for (const particle of particles) {
+      const angle = particle.arm * Math.PI * 2 / 3 + particle.position * 6.2 + rotation;
+      const r = (18 + radius * particle.position) * coil;
+      const drift = particle.drift * (1 - smooth(.45, 1, progress));
+      const x = width / 2 + Math.cos(angle) * r + drift;
+      const y = height * .51 + Math.sin(angle) * r * .78 + drift * .6;
+      const twinkle = .55 + .45 * Math.pow(Math.sin(particle.phase + progress * 11), 4);
+      const size = particle.size * (.75 + twinkle * .45);
+      ctx.globalAlpha = fade * twinkle * particle.light;
+      ctx.fillStyle = particle.tint;
+      ctx.shadowBlur = particle.glint ? 7 : 0;
+      ctx.shadowColor = '#f1c875';
+      ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      // Short tangential traces make the direction of the spiral visible.
+      ctx.globalAlpha *= .35;
+      ctx.lineWidth = Math.max(.45, size * .5); ctx.strokeStyle = particle.tint;
+      ctx.beginPath(); ctx.moveTo(x, y);
+      ctx.lineTo(width / 2 + Math.cos(angle - .055) * r + drift,
+        height * .51 + Math.sin(angle - .055) * r * .78 + drift * .6);
+      ctx.stroke();
+      if (particle.glint) {
+        ctx.globalAlpha = fade * Math.pow(twinkle, 2) * .85;
+        ctx.strokeStyle = '#fff3cc'; ctx.lineWidth = .65;
+        ctx.beginPath(); ctx.moveTo(x - size * 3.2, y); ctx.lineTo(x + size * 3.2, y);
+        ctx.moveTo(x, y - size * 3.2); ctx.lineTo(x, y + size * 3.2); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  }
+  function tick(now) {
+    frame = 0;
+    if (!running || paused) return;
+    elapsed += now - lastTime; lastTime = now;
+    draw(Math.min(1, elapsed / INTRO_TIMING.opening));
+    if (elapsed < INTRO_TIMING.opening) frame = window.requestAnimationFrame(tick);
+    else stop();
+  }
+  function stop() {
+    window.cancelAnimationFrame(frame); frame = 0; running = false; paused = false;
+    ctx.clearRect(0, 0, width, height); canvas.hidden = true;
+    window.removeEventListener('resize', resize);
+  }
+  function play() {
+    stop(); running = true; canvas.hidden = false; elapsed = 0; resize();
+    const colors = ['#d9a44d', '#edc76f', '#f8dc96', '#ffefbf'];
+    particles = Array.from({length:width < 600 ? 300 : 460}, (_, i) => ({
+      arm:i % 3, position:Math.random(), drift:(Math.random() - .5) * 26,
+      phase:Math.random() * Math.PI * 2, size:.5 + Math.random() * 1.15,
+      light:.8 + Math.random() * .2, tint:colors[i % colors.length], glint:i % 8 === 0
+    }));
+    lastTime = performance.now();
+    window.addEventListener('resize', resize);
+    frame = window.requestAnimationFrame(tick);
+  }
+  function pause() { if (running) { paused = true; window.cancelAnimationFrame(frame); frame = 0; } }
+  function resume() {
+    if (!running || !paused) return;
+    paused = false; lastTime = performance.now(); frame = window.requestAnimationFrame(tick);
+  }
+  return {play, pause, resume, stop};
+}
+
 export function createReportIntro({onOpen}) {
   const el = id => document.getElementById(id);
   const root = el('report-intro');
@@ -38,6 +127,7 @@ export function createReportIntro({onOpen}) {
   const next = el('intro-next');
   const dots = [...el('intro-dots').children];
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const sparkles = createSparkVortex(el('intro-sparkles'));
   const snapshots = {};
   let audience = null, index = 0, phase = 'idle', active = false, userPaused = false;
   let timer = 0, due = 0, remaining = 0, action = null, animation = null;
@@ -63,8 +153,10 @@ export function createReportIntro({onOpen}) {
     if (isPaused()) {
       if (timer) { remaining = Math.max(0, due - performance.now()); clearTimeout(timer); timer = 0; }
       animation?.pause();
+      sparkles.pause();
     } else {
       animation?.play();
+      sparkles.resume();
       if (!timer) runClock();
     }
     root.classList.toggle('is-paused', isPaused());
@@ -143,6 +235,7 @@ export function createReportIntro({onOpen}) {
   }
   function stop() {
     active = false; phase = 'idle'; clearClock(); animation?.cancel(); animation = null;
+    sparkles.stop();
     root.classList.remove('is-opening', 'is-paused');
     root.removeAttribute('aria-busy');
     open.disabled = false; skip.disabled = false;
@@ -175,6 +268,7 @@ export function createReportIntro({onOpen}) {
     phase = 'opening'; clearClock(); animation?.cancel(); animation = null;
     open.disabled = true; skip.disabled = true;
     root.setAttribute('aria-busy', 'true'); root.classList.add('is-opening');
+    if (!motion.matches) { sparkles.play(); if (isPaused()) sparkles.pause(); }
     schedule(motion.matches ? 0 : INTRO_TIMING.opening, () => {
       stop(); onOpen();
     });

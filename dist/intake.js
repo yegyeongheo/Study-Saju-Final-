@@ -20,7 +20,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     ['hai', '해시 · 21:00–22:59', '21:00', '23:00']
   ];
   const regions = ['서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원특별자치도', '충청북도', '충청남도', '전북특별자치도', '전라남도', '경상북도', '경상남도', '제주특별자치도', '해외·기타'];
-  const studyLabels = {kindergarten:'유치원', school:'학교 공부·내신', college:'대학 입시', 'civil-service':'공무원 시험', professional:'전문직 시험', other:'자격증·어학·기타'};
+  const studyLabels = {'early-school':'유치·초등', 'secondary-school':'중고등 학교내신', 'college-entrance':'수능•대학입시', 'certification-language':'자격증·어학', 'job-preparation':'취업 준비', 'public-professional':'공무원·전문직', career:'직장인·커리어', 'self-development':'자기계발·취미'};
   const relationLabels = {father:'부', mother:'모', grandparent:'조부모'};
   const personLabels = {child:'아이', self:'본인', guardian:'보호자'};
   const form = document.getElementById('intake-form');
@@ -368,7 +368,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     Object.values(sections).filter(section => !section.disabled).forEach(validatePerson);
     if (!form.reportValidity()) return;
     const payload = {
-      schemaVersion:3,
+      schemaVersion:4,
       audience,
       learner:readPerson(audience),
       guardian:audience === 'child' ? {...readPerson('guardian'), relationship:form.querySelector('[name="guardian-relationship"]:checked').value} : null,
