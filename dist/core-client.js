@@ -58,7 +58,7 @@ export async function analyzeCore(request, {signal, fetchImpl = globalThis.fetch
   try { value = await response.json(); }
   catch { throw new CoreError('INVALID_RESPONSE'); }
   if (!response.ok || value?.status === 'error') throw new CoreError(value?.error?.code || 'HTTP_ERROR', value);
-  if (!['ok','partial'].includes(value?.status) || value.schemaVersion !== '1.0.0'
+  if (!['ok','partial'].includes(value?.status) || !['1.0.0','1.1.0'].includes(value.schemaVersion)
       || value.requestId !== request.requestId || value.result?.kind !== request.operation
       || !Array.isArray(value.result?.subjects)) throw new CoreError('INVALID_RESPONSE', value);
   return value; // Preserve every core field; never project into a report schema.

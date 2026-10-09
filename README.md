@@ -44,11 +44,13 @@ JavaScript 모듈을 사용하므로 HTML 파일을 직접 더블클릭하는 �
 
 개인화 질문을 완료하면 `studysaju:intake-ready` 이벤트가 발생하고 입력·답변 확인 화면이 나옵니다. `event.detail`은 성별을 포함한 schemaVersion 5 데이터입니다. “타고난 공부 기질 알아보기”를 누르면 인트로가 시작되고, 금빛 안개 전환 뒤 `studysaju:intro-complete` 이벤트와 함께 무료 결과 화면이 열립니다.
 
-분석 버튼은 `/api/saju/v1/analyze`를 호출합니다. 결과는 `studysaju:core-ready` 이벤트와 `window.studySajuCore.getResult()`로 이용할 수 있습니다. 현재 생시 입력은 시진/모름이므로 코어 규칙상 대운은 계산 불가 사유와 함께 반환됩니다. 정확한 생시를 보내는 원본 API에서는 대운도 계산됩니다. 기존 리포트 확장 지점 `window.studySajuAnalyze(payload, {signal, calculation})`은 유지하며 별도 구현 전에는 계산 완료 안내만 표시합니다. 입력 수정·페이지 이탈 시 이전 요청과 결과를 폐기합니다. 실행, 전체 JSON 계약, 지역 매핑 및 제한은 [CORE_API.md](CORE_API.md)를 참조하세요.
+분석 버튼은 `/api/saju/v1/analyze`를 호출합니다. 결과는 `studysaju:core-ready` 이벤트와 `window.studySajuCore.getResult()`로 이용할 수 있습니다. v1.1 코어는 시진 입력에서는 해당 시간 범위로, 시간 모름에서는 출생 날짜 전체로 대운을 계산합니다. 공통/가능한 대운과 시작 시점 범위를 원본 그대로 받으며, 정확한 생시를 보내는 API는 기존 시각 계산을 유지합니다. 기존 리포트 확장 지점 `window.studySajuAnalyze(payload, {signal, calculation})`은 유지하며 별도 구현 전에는 계산 완료 안내만 표시합니다. 입력 수정·페이지 이탈 시 이전 요청과 결과를 폐기합니다. 실행, 전체 JSON 계약, 지역 매핑 및 제한은 [CORE_API.md](CORE_API.md)를 참조하세요.
 
 개인정보 정책은 초안이며 보유기간·정책 버전·법정대리인 확인 절차·동의 기록 저장은 추후 연결할 구조입니다. 현재 입력 및 동의 선택은 페이지 메모리에만 유지되고 새로고침하면 초기화됩니다.
 
 ## 가져온 버전
+
+최신 검증 결과: [대운 범위 계산 연결 검증](RANGE_INTEGRATION_VERIFICATION.md).
 
 - 원본 소스 기준: `b5c70560871d60311a41bb044c56c39715866b85`
 - 실행에 필요한 현재 소스와 사용 중인 이미지를 포함했습니다.

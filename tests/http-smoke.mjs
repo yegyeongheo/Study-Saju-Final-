@@ -14,11 +14,15 @@ for (const audience of ['self','child']) {
   assert.equal(output.schemaVersion, 'studysaju-calculation-v1');
   assert.deepEqual(Object.keys(output.subjects), audience === 'self' ? ['learner'] : ['learner','guardian']);
   for (const result of Object.values(output.subjects)) {
-    assert.equal(result.status, 'partial');
+    assert.equal(result.status, 'ok');
+    assert.equal(result.schemaVersion, '1.1.0');
     assert.ok(result.result.subjects[0].candidates[0].traits);
     assert.ok(result.result.subjects[0].candidates[0].features.values.yangRatio >= 0);
     assert.ok(result.result.timeline.data.segments.length);
-    assert.ok(result.result.timeline.data.segments.every(s => s.daeunUnavailableReason === 'BIRTH_TIME_UNCERTAIN'));
+    assert.ok(result.result.timeline.data.segments.every(s => s.daeunUnavailableReason !== 'BIRTH_TIME_UNCERTAIN'));
+    assert.ok(result.result.timeline.data.daeunRanges.length);
+    assert.ok(result.result.timeline.data.daeunSummary.length);
+    assert.ok(result.result.timeline.data.segments.some(s => s.daeunRange.options.some(o => o.daeunPillar)));
     assert.ok(result.warnings.some(w => w.code === 'ESTIMATED_LOCATION'));
   }
 }

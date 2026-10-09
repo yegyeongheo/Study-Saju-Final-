@@ -89,8 +89,11 @@ class ApiIntegrationTests(unittest.TestCase):
                     if request['subjects'][0]['birthTime']['mode'] == 'exact':
                         self.assertTrue(all(s['daeunPillar'] for s in segments))
                     else:
-                        self.assertEqual(result['status'], 'partial')
-                        self.assertTrue(all(s['daeunUnavailableReason'] == 'BIRTH_TIME_UNCERTAIN' for s in segments))
+                        self.assertEqual(result['status'], 'ok')
+                        self.assertEqual(result['schemaVersion'], '1.1.0')
+                        self.assertTrue(result['result']['timeline']['data']['daeunRanges'])
+                        self.assertTrue(result['result']['timeline']['data']['daeunSummary'])
+                        self.assertTrue(all(s['daeunUnavailableReason'] != 'BIRTH_TIME_UNCERTAIN' for s in segments))
 
     def test_02_invalid_inputs_remain_engine_errors(self):
         bad_date = copy.deepcopy(self.sample)

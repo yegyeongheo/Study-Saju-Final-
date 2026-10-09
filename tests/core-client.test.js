@@ -48,3 +48,14 @@ test('abort, HTTP failure, malformed and mismatched responses cannot succeed', a
   await assert.rejects(analyzeCore({}, {fetchImpl:async () => ({ok:true,json:async () => {throw new Error();}})}), {code:'INVALID_RESPONSE'});
   await assert.rejects(analyzeCore({requestId:'expected'}, {fetchImpl:async () => ({ok:true,json:async () => ({schemaVersion:'1.0.0',status:'ok',requestId:'other',result:{subjects:[]}})})}), {code:'INVALID_RESPONSE'});
 });
+
+test('schema 1.1 range calculation is accepted and preserved without choosing a candidate', async () => {
+  const request = {requestId:'range',operation:'timeline'};
+  const value = {schemaVersion:'1.1.0',requestId:'range',status:'ok',result:{kind:'timeline',subjects:[],timeline:{data:{
+    daeunSummary:[{precision:'date',certainty:'multiple',daeunPillars:['甲子','乙丑']}],
+    daeunRanges:[{scenarios:[{boundaries:[{earliestUtc:'2026-01-01T00:00:00Z',latestUtc:'2026-01-02T00:00:00Z'}]}]}]
+  }}}};
+  const output = await analyzeCore(request,{fetchImpl:async () => ({ok:true,json:async () => value})});
+  assert.deepEqual(output,value);
+  assert.equal(output.result.timeline.data.daeunSummary[0].certainty,'multiple');
+});

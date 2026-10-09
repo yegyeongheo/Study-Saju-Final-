@@ -1,5 +1,7 @@
 # 코어 연결 검증 — 2026-10-09
 
+이 문서는 초기 v1.0 코어 연결 당시의 검증 기록이다. 이후 사용자 요청으로 코어의 시진/시간 모름 대운 계산을 범위 계산으로 수정했으며, 최신 동작은 [CORE_API.md](CORE_API.md)의 v1.1 계약을 따른다. 아래 `BIRTH_TIME_UNCERTAIN` 결과는 변경 전 기록이다.
+
 - 기준 사이트: `ff786b070010e9695d0fcde6d0d3b7c40f534987`
 - 원본 코어: `015ce53c416032f164404cbae62e1bda5d9750b3`
 - 실행: Windows, Python 3.12.14, 코어 `requirements.lock` 전부 설치, Node.js 21.6.2

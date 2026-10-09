@@ -8,13 +8,13 @@ Python **3.12.14**와 Git, 테스트용 Node.js 20 이상이 필요하다. 엔�
 
 ```powershell
 git clone https://github.com/yegyeongheo/Saju-Core-Engine.git ../Saju-Core-Engine
-git -C ../Saju-Core-Engine checkout --detach 015ce53c416032f164404cbae62e1bda5d9750b3
+git -C ../Saju-Core-Engine checkout --detach bac8b553c650d667bd3854f829db26dc7785ec56
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r ../Saju-Core-Engine/requirements.lock
 .venv/Scripts/python.exe -B -m server.app --port 8000
 ```
 
-macOS/Linux에서는 `.venv/bin/python`을 사용한다. 다른 위치의 엔진은 `SAJU_CORE_ROOT` 환경변수로 지정한다. `/start.html`에서 기존 입력 흐름을 사용한다. 서버는 로컬 `127.0.0.1`에만 바인딩되며 `dist`와 API를 같은 출처로 제공한다. 서버 시작 시 Python·의존성·동결 파일·원본 소스 112개를 검증한다. 고정 버전이 다르면 실행을 중단한다.
+macOS/Linux에서는 `.venv/bin/python`을 사용한다. 다른 위치의 엔진은 `SAJU_CORE_ROOT` 환경변수로 지정한다. `/start.html`에서 기존 입력 흐름을 사용한다. 서버는 로컬 `127.0.0.1`에만 바인딩되며 `dist`와 API를 같은 출처로 제공한다. 서버 시작 시 Python·의존성·동결 파일·등록 소스 117개를 검증한다. 고정 버전이 다르면 실행을 중단한다. 위 v1.1 커밋은 로컬 검증본으로, 원격에서 받으려면 별도로 승인한 GitHub 업로드가 선행되어야 한다.
 
 `core-engine.lock.json`의 Git 커밋, buildId, manifest SHA-256을 기준으로 실행한다. 서비스는 체크아웃 밖의 lock에서 읽은 해시를 코어의 `SAJU_EXPECTED_SOURCE_SHA256`에 전달한다. 별도 환경변수가 지정되면 lock과 같은 값이어야 한다. `SAJU_CORE_ROOT`나 lock 변경으로 새 엔진을 도입할 때는 별도의 검토가 필요하다. 실행 중 원본 파일 변경도 코어의 요청별 무결성 검사에서 거부한다.
 
@@ -22,7 +22,7 @@ macOS/Linux에서는 `.venv/bin/python`을 사용한다. 다른 위치의 엔진
 
 `POST /api/saju/v1/analyze`, `Content-Type: application/json`
 
-요청과 응답은 **기존 코어 public-v1 JSON 규격 그대로**다. `natal`, `timeline`, `pair`를 모두 지원한다. 코어의 `run_api.py` 입력을 그대로 POST할 수 있다. `timeline` 응답은 원국 계산 전체와 대운·세운·상호작용을 함께 포함하므로 사이트는 이 연산을 사용한다.
+요청과 응답은 **선택한 코어의 public-v1 JSON 규격 그대로**다. `natal`, `timeline`, `pair`를 모두 지원한다. 코어의 `run_api.py` 입력을 그대로 POST할 수 있다. v1.1 코어는 입력 schema 1.0.0/1.1.0을 받아 1.1.0 응답을 반환한다. 사이트 클라이언트는 1.0.0/1.1.0 응답을 수용한다. `timeline` 응답은 원국 계산 전체와 대운·세운·상호작용을 함께 포함하므로 사이트는 이 연산을 사용한다.
 
 ```json
 {
@@ -54,6 +54,9 @@ macOS/Linux에서는 `.venv/bin/python`을 사용한다. 다른 위치의 엔진
 | Trait·발현·근거 | `candidates[].traits`, `candidates[].evidence` |
 | 후보 통합 요약 | `result.subjects[].summary` |
 | 대운·세운·상호작용·전환·근거 | `result.timeline.data.segments[]` 전체 |
+| 시진/하루 범위의 대운 시작 최소·최대 | `result.timeline.data.daeunRanges[].scenarios[].boundaries[]` |
+| 입력 범위 전체의 공통/가능한 대운 | `result.timeline.data.daeunSummary[]` |
+| 후보 구간별 대운 대안과 계산·근거 | `result.timeline.data.segments[].daeunRange.options[]` |
 | 관계 계산 | `result.pair` (`operation: pair` 요청 시) |
 | 버전·재현 식별자·경고·가용성 | `versions`, `inputDigest`, `warnings`, `result.layers` |
 
@@ -91,7 +94,7 @@ window.addEventListener('studysaju:core-cleared', () => {
 - 양력은 `gregorian`, 음력은 `korean_lunisolar`. 입력 날짜와 윤달 여부를 그대로 보내며 음양력 변환과 유효성 판단은 코어에서 수행한다.
 - 남성/여성은 코어의 `luckDirectionBasis: M/F` 입력에 대응한다. 보호자 관계로 성별을 추정하지 않는다.
 - 12시진은 `mode: branch`, 자시도 `ziPart: unspecified`, 시간 모름은 `mode: unknown`. 임의의 정각·정오로 바꾸지 않는다.
-- **현재 UI는 정확한 생시를 수집하지 않으므로 대운은 `BIRTH_TIME_UNCERTAIN`으로 계산 불가가 반환된다.** 세운, 원국, Feature, Trait 등 계산 가능한 값은 전달된다. 원본 API에 정확한 시각을 요청하면 대운도 반환됨을 테스트한다. 대운을 UI에서 계산 가능하게 하려면 정확한 시각 수집을 별도 작업으로 추가해야 한다.
+- **v1.1 코어는 현재 UI의 시진 입력과 시간 모름 입력으로도 대운을 계산한다.** 시진은 해당 범위, 시간 모름은 현지 생년월일의 하루 전체를 대상으로 한다. 사이트에서는 대운을 재계산하거나 후보 하나를 선택하지 않는다. `daeunSummary`의 `certainty: common`은 입력 범위 전체에 공통이고 `multiple`은 여러 가능성이 있다는 뜻이다. 시작 시점 범위의 `earliestUtc/latestUtc`는 포함되는 최소·최대값이다. 단일 `daeunPillar`가 null이어도 `daeunRange.options[]`에 계산된 대안이 있을 수 있다. `status: ok`가 정확한 생시를 알아냈다는 뜻은 아니다.
 - 국내 지역은 `Asia/Seoul`과 아래 추정 대표 좌표를 전달하며 항상 `precision: region`으로 표시한다. 코어가 `ESTIMATED_LOCATION` 경고를 반환한다. 대표점은 지역의 실제 경계 중심이나 사용자의 실제 출생 좌표가 아니다. 경계 시각에 민감한 정확 계산에는 더 구체적인 위치 수집이 필요하다.
 - `해외·기타`는 국가/시간대/좌표가 없어 `BIRTH_PLACE_REQUIRED`로 중단한다. 서울 좌표로 대체하지 않는다. 원본 API는 위치·IANA 시간대를 직접 제공하는 해외 입력도 지원한다.
 
