@@ -40,9 +40,13 @@ export async function relay(request, env, fetchImpl = fetch) {
   const client=Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
   try {
     const result=await fetchImpl(new URL('/api/saju/v1/analyze',upstream),{
-      method:'POST',redirect:'error',signal:AbortSignal.timeout(28000),body,
+      method:'POST',redirect:'manual',signal:AbortSignal.timeout(28000),body,
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${env.SAJU_API_TOKEN}`,'X-Saju-Client-ID':client}
     });
+    if (result.status >= 300 && result.status < 400) {
+      await result.body?.cancel();
+      return jsonError(502,'UPSTREAM_REDIRECT_REJECTED');
+    }
     const headers={'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
     if (result.status===429) headers['Retry-After']='60';
     return new Response(result.body,{status:result.status,headers});

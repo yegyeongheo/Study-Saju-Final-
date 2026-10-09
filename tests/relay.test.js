@@ -16,10 +16,18 @@ test('relay overwrites credentials, hashes address, preserves JSON and limits fo
     assert.equal(options.headers.Authorization,'Bearer '+env.SAJU_API_TOKEN);
     assert.match(options.headers['X-Saju-Client-ID'],/^[a-f0-9]{64}$/);
     assert.ok(!JSON.stringify(options.headers).includes('192.0.2.1'));
-    assert.equal(options.redirect,'error');
+    assert.equal(options.redirect,'manual');
     return new Response('{"untouched":[1,null]}',{headers:{'Set-Cookie':'secret','Authorization':'secret'}});
   });
   assert.equal(await result.text(),'{"untouched":[1,null]}');
   assert.equal(result.headers.get('Set-Cookie'),null);
   assert.equal(result.headers.get('Authorization'),null);
+});
+test('redirects are rejected without following them or exposing their location',async()=>{
+  let calls=0;
+  const res=await relay(request(),env,async()=>{calls++;return new Response(null,{status:307,headers:{Location:'https://elsewhere.invalid'}});});
+  assert.equal(calls,1);
+  assert.equal(res.status,502);
+  assert.equal(res.headers.get('Location'),null);
+  assert.equal((await res.json()).error.code,'UPSTREAM_REDIRECT_REJECTED');
 });
