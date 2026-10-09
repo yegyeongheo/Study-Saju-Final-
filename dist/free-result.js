@@ -1,4 +1,5 @@
 import {calculateCore} from './core-client.js';
+import {createReportCards} from './report-cards.js';
 // Core calculation is separate from the optional, future report adapter.
 export function validateFreeResult(value) {
   const text = (key, max) => {
@@ -8,6 +9,7 @@ export function validateFreeResult(value) {
     return value[key].trim();
   };
   const result = {typeName:text('typeName', 80), headline:text('headline', 200), summary:text('summary', 4000), strengths:[]};
+  if (typeof value.typeId === 'string' && /^[a-z][a-z0-9-]{0,63}$/.test(value.typeId)) result.typeId = value.typeId;
   if (value.strengths !== undefined) {
     if (!Array.isArray(value.strengths) || value.strengths.length > 6
       || value.strengths.some(item => typeof item !== 'string' || !item.trim() || item.length > 240)) {
@@ -20,6 +22,8 @@ export function validateFreeResult(value) {
 
 export function createFreeResultController({calculate = calculateCore} = {}) {
   const el = id => document.getElementById(id);
+  const cards = createReportCards();
+  let cardSubject = null;
   let state = 'unavailable', report = null, calculation = null, errorCode = null, generation = 0, controller = null, timer = 0;
   function cancel() {
     generation++;
@@ -32,6 +36,8 @@ export function createFreeResultController({calculate = calculateCore} = {}) {
     el('free-result-content').hidden = !ready;
     el('retry-analysis').hidden = state !== 'error';
     el('free-result-view').setAttribute('aria-busy', String(state === 'loading'));
+    if (ready || state === 'calculated') cards.render(calculation, cardSubject, report);
+    else cards.reset();
     if (ready) {
       el('free-result-type').textContent = report.typeName;
       el('free-result-headline').textContent = report.headline;
@@ -57,7 +63,7 @@ export function createFreeResultController({calculate = calculateCore} = {}) {
     }
   }
   function reset() {
-    cancel(); report = null; calculation = null; errorCode = null; state = 'unavailable';
+    cancel(); report = null; calculation = null; cardSubject = null; errorCode = null; state = 'unavailable';
     window.dispatchEvent(new CustomEvent('studysaju:core-cleared'));
     ['free-result-type','free-result-headline','free-result-summary'].forEach(id => el(id).textContent = '');
     el('free-result-strengths').replaceChildren();
@@ -65,6 +71,7 @@ export function createFreeResultController({calculate = calculateCore} = {}) {
   }
   function prepare(payload, studyLabel) {
     reset();
+    cardSubject = {audience:payload.audience, learner:{gender:payload?.learner?.gender}};
     el('free-result-title').textContent = payload.audience === 'child'
       ? `${payload.learner.name}의 공부 운명서` : `${payload.learner.name}님의 공부 운명서`;
     el('free-result-context').textContent = studyLabel;

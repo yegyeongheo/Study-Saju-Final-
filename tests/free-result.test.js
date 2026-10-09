@@ -6,7 +6,7 @@ const flush = () => new Promise(resolve => setImmediate(resolve));
 function harness(calculate) {
   const nodes = new Map();
   globalThis.document = {getElementById(id) {
-    if (!nodes.has(id)) nodes.set(id, {textContent:'',hidden:false,setAttribute(){},replaceChildren(){},append(){}});
+    if (!nodes.has(id)) nodes.set(id, {textContent:'',hidden:false,setAttribute(){},removeAttribute(){},replaceChildren(){},append(){}});
     return nodes.get(id);
   }};
   globalThis.window = new EventTarget();

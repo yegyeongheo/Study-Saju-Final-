@@ -164,6 +164,28 @@
         <h2 id="free-result-status-title">무료 해석 연결 전이에요.</h2>
         <p id="free-result-status-message">현재는 화면 미리보기이며,<br>실제 사주 분석 결과는 아직 제공되지 않아요.</p>
       </div>
+      <section class="report-cards" id="report-cards" aria-label="나의 일주 동물과 공부 유형 카드" hidden>
+        <article class="report-card" aria-labelledby="day-card-title">
+          <p class="report-card-label">01 · 일주 동물</p>
+          <h2 id="day-card-title"></h2>
+          <p class="report-card-caption" id="day-card-pillar"></p>
+          <div class="report-card-artwork">
+            <img id="day-card-image" alt="" decoding="async" hidden>
+            <p class="report-card-placeholder" id="day-card-placeholder"></p>
+          </div>
+          <p class="report-card-symbol" id="day-card-symbol" hidden></p>
+        </article>
+        <article class="report-card" aria-labelledby="study-card-title">
+          <p class="report-card-label">02 · 공부 유형</p>
+          <h2 id="study-card-title"></h2>
+          <p class="report-card-caption" id="study-card-caption"></p>
+          <div class="report-card-artwork">
+            <img id="study-card-image" alt="" decoding="async" hidden>
+            <p class="report-card-placeholder" id="study-card-placeholder"></p>
+          </div>
+        </article>
+        <p class="card-symbol-note" id="card-symbol-note" hidden>토템은 전통 오행에서 영감을 받은<br>공부사주의 디자인 상징이에요.</p>
+      </section>
       <article class="free-result-content" id="free-result-content" aria-labelledby="free-result-headline" hidden>
         <p class="result-type" id="free-result-type"></p>
         <h2 id="free-result-headline"></h2>

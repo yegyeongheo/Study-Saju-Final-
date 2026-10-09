@@ -14,6 +14,16 @@
 .result-type{display:inline-block;font-size:15px;color:var(--lav);border:1px solid #c6b8ea60;border-radius:999px;padding:5px 18px;margin:0 0 24px}
 .result-strengths{list-style:none;padding:0;margin:28px 0 0}
 .result-strengths li{padding:17px 0;border-top:1px solid #c6b8ea22;color:#ded7ec;overflow-wrap:anywhere}
+.report-cards{display:grid;gap:52px;margin:16px 0 44px;text-align:center}
+.report-card{min-width:0}
+.report-card-label{font-size:14px;letter-spacing:2px;color:var(--lav);margin:0 0 15px}
+.report-card h2{font:clamp(26px,7vw,32px)/1.6 'Gowun Batang',serif;color:var(--paper);margin:0;overflow-wrap:anywhere}
+.report-card-caption{font-size:14px;line-height:1.8;color:#c8c1d8;margin:10px 0 24px;overflow-wrap:anywhere}
+.report-card-artwork{position:relative;display:grid;place-items:center;width:min(100%,290px);aspect-ratio:1/2;margin:0 auto;border:1px solid #d6bb7866;border-radius:16px;overflow:hidden;background:#252942;box-shadow:0 18px 45px #080b1940}
+.report-card-artwork img{display:block;width:100%;height:100%;object-fit:contain}
+.report-card-placeholder{font:16px/2 'Gowun Batang',serif;color:#c6b8ea;white-space:pre-line;padding:24px;margin:0}
+.report-card-symbol{font-size:15px;line-height:1.9;color:#dcc891;white-space:pre-line;margin:22px 0 0}
+.card-symbol-note{font-size:14px;line-height:1.9;color:#aba6bb;margin:0}
 .intake-page{min-height:100svh;isolation:isolate}
 .intake-page [hidden]{display:none!important}
 .intake-landscape{position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,#20243d05,#20243d18 60%,#20243d55),url('landscape.webp') center 64%/cover no-repeat}
