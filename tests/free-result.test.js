@@ -11,8 +11,9 @@ function harness(calculate) {
   }};
   globalThis.window = new EventTarget();
   window.setTimeout = setTimeout;
-  const controller = createFreeResultController({calculate});
-  return {controller,nodes};
+  const view={renders:[],render(...args){this.renders.push(args);},reset(){this.renders=[];}};
+  const controller = createFreeResultController({calculate,createView:()=>view});
+  return {controller,nodes,view};
 }
 const payload = {audience:'self',learner:{name:'테스트'}};
 
@@ -22,12 +23,26 @@ test('calculation success never invents a report; consumers receive independent 
   let ready;
   window.addEventListener('studysaju:core-ready', event => {ready = event.detail; ready.subjects.learner.extra.push(2);});
   controller.prepare(payload, '공부'); await flush();
-  assert.equal(nodes.get('free-result-status-title').textContent, '사주 계산이 완료됐어요.');
-  assert.equal(nodes.get('free-result-content').hidden, true);
+  assert.equal(nodes.get('free-result-status').hidden, true);
+  assert.equal(nodes.get('free-result-content').hidden, false);
   assert.ok(ready);
   const copy = controller.getCalculation(); copy.subjects.learner.extra.push(3);
   assert.deepEqual(controller.getCalculation().subjects.learner.extra, [1]);
   controller.reset(); assert.equal(controller.getCalculation(), null);
+});
+
+test('verified type adapter is passed to the view; birth date and open question are not',async()=>{
+  const {controller,view}=harness(async()=>({subjects:{}}));
+  window.studySajuAnalyze=async()=>({studyType:{typeId:'verified-type',typeName:'검증 유형',hanja:'測試',headline:'검증된 핵심 문장',description:['시작 모습.','이해 모습.','풀이 모습.']}});
+  controller.prepare({...payload,learner:{...payload.learner,gender:'female',birthDate:{year:2000},birthTime:{isUnknown:true}},personalization:{focus:{id:'stress'},personalQuestion:{text:'개인 질문'}}},'공부');
+  await flush();
+  assert.equal(view.renders.length,1);
+  const [,context,report]=view.renders[0];
+  assert.equal(report.studyType.typeId,'verified-type');
+  assert.equal(context.learner.birthTime.isUnknown,true);
+  assert.equal(context.learner.name,undefined);assert.equal(context.learner.birthDate,undefined);
+  assert.equal(context.personalization.personalQuestion,undefined);
+  controller.reset();
 });
 
 test('input edit cancels request and ignores late old response; retry accepts latest', async () => {
@@ -64,3 +79,4 @@ test('timeout aborts and ignores subsequent response', async () => {
   assert.equal(nodes.get('retry-analysis').hidden, false);
   controller.reset();
 });
+

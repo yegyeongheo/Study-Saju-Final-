@@ -1,7 +1,10 @@
 import {calculateCore} from './core-client.js';
-import {createReportCards} from './report-cards.js';
+import {createFreeReportView} from './free-report-view.js';
+import {suppliedStudyType} from './free-report-model.js';
 // Core calculation is separate from the optional, future report adapter.
 export function validateFreeResult(value) {
+  const studyType=suppliedStudyType(value);
+  if(studyType)return {studyType};
   const text = (key, max) => {
     if (typeof value?.[key] !== 'string' || !value[key].trim() || value[key].length > max) {
       throw new Error('Invalid free report');
@@ -20,9 +23,9 @@ export function validateFreeResult(value) {
   return result;
 }
 
-export function createFreeResultController({calculate = calculateCore} = {}) {
+export function createFreeResultController({calculate = calculateCore, createView = createFreeReportView} = {}) {
   const el = id => document.getElementById(id);
-  const cards = createReportCards();
+  const view = createView();
   let cardSubject = null;
   let state = 'unavailable', report = null, calculation = null, errorCode = null, generation = 0, controller = null, timer = 0;
   function cancel() {
@@ -31,23 +34,16 @@ export function createFreeResultController({calculate = calculateCore} = {}) {
     controller?.abort(); controller = null;
   }
   function render() {
-    const ready = state === 'ready';
+    const ready = state === 'ready' || state === 'calculated';
     el('free-result-status').hidden = ready;
     el('free-result-content').hidden = !ready;
     el('retry-analysis').hidden = state !== 'error';
     el('free-result-view').setAttribute('aria-busy', String(state === 'loading'));
-    if (ready || state === 'calculated') cards.render(calculation, cardSubject, report);
-    else cards.reset();
+    if (ready) view.render(calculation, cardSubject, report);
+    else view.reset();
     if (ready) {
-      el('free-result-type').textContent = report.typeName;
-      el('free-result-headline').textContent = report.headline;
-      el('free-result-summary').textContent = report.summary;
-      const list = el('free-result-strengths');
-      list.replaceChildren();
-      report.strengths.forEach(text => {
-        const item = document.createElement('li'); item.textContent = text; list.append(item);
-      });
-      list.hidden = !report.strengths.length;
+      // Intake reveals the result after this synchronous render; observe on the next frame.
+      window.requestAnimationFrame?.(()=>view.reveal?.());
       return;
     }
     const messages = {
@@ -65,13 +61,14 @@ export function createFreeResultController({calculate = calculateCore} = {}) {
   function reset() {
     cancel(); report = null; calculation = null; cardSubject = null; errorCode = null; state = 'unavailable';
     window.dispatchEvent(new CustomEvent('studysaju:core-cleared'));
-    ['free-result-type','free-result-headline','free-result-summary'].forEach(id => el(id).textContent = '');
-    el('free-result-strengths').replaceChildren();
     render();
   }
   function prepare(payload, studyLabel) {
     reset();
-    cardSubject = {audience:payload.audience, learner:{gender:payload?.learner?.gender}};
+    // Display model only needs gender, time-known flag, and questionnaire option IDs.
+    cardSubject = {audience:payload.audience, learner:{gender:payload?.learner?.gender,
+      birthTime:{isUnknown:payload?.learner?.birthTime?.isUnknown,period:payload?.learner?.birthTime?.period}},
+      personalization:{environment:{id:payload.personalization?.environment?.id},focus:{id:payload.personalization?.focus?.id}}};
     el('free-result-title').textContent = payload.audience === 'child'
       ? `${payload.learner.name}의 공부 운명서` : `${payload.learner.name}님의 공부 운명서`;
     el('free-result-context').textContent = studyLabel;

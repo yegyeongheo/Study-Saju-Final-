@@ -1,0 +1,61 @@
+/* One column; actual card artwork keeps its complete frame. */
+.free-result-view{width:min(100%,680px)}
+.free-report-content{border:0;padding:0}
+.free-report-content .report-cards{display:block;margin:0}
+.report-section{padding:48px 0 52px;border-top:1px solid #c6b8ea30;text-align:center}
+.report-section-number{font-size:12px;letter-spacing:2.3px;color:var(--lav);margin:0 0 18px}
+.report-section h2,.report-share h2{font:clamp(26px,6.6vw,34px)/1.6 'Gowun Batang',serif;color:var(--paper);margin:0 0 20px;overflow-wrap:anywhere}
+.report-section .report-type-name{font:clamp(28px,8vw,39px)/1.5 'Gowun Batang',serif;color:var(--lav);margin:26px 0 6px}
+.report-hanja{font:25px/1.7 'Gowun Batang',serif;letter-spacing:4px;color:#e0cb95;margin:5px 0 14px}
+.report-core-line{font-size:18px;line-height:1.9;margin:14px auto 28px;max-width:29ch;color:#f5efff;word-break:keep-all;overflow-wrap:anywhere}
+.report-section .report-card-artwork{width:min(100%,310px);margin:28px auto 30px}
+.report-section-intro,.report-section .report-card-caption{font-size:15px;line-height:1.9;color:#c8c1d8}
+.report-prose{font-size:16px;line-height:2;word-break:keep-all;overflow-wrap:anywhere;margin:28px auto;color:#ded9e8;max-width:520px}
+.report-prose p{margin:0 0 10px}.report-prose p:last-child{margin-bottom:0}
+.report-strengths{margin:30px 0 0;text-align:center}
+.report-strengths>div{padding:23px 14px;border-top:1px solid #c6b8ea25}
+.report-strengths dt{font-size:17px;color:var(--lav);font-weight:500;margin-bottom:9px}
+.report-strengths dd{font-size:15px;line-height:1.9;color:#d6d0e3;margin:0;word-break:keep-all;overflow-wrap:anywhere}
+.report-keywords{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin:24px 0;padding:0}
+.report-keywords li{font-size:14px;border:1px solid #d5bd794d;border-radius:999px;padding:7px 16px;color:#e1cda0}
+.report-section .card-symbol-note{font-size:13px;line-height:1.9;margin-top:28px;color:#b4aec4}
+.report-insights{display:grid;gap:18px;margin-top:32px}
+.report-insight{padding:28px 22px;background:#c6b8ea09;border:1px solid #c6b8ea30;border-radius:16px}
+.report-insight h3{font-size:14px;color:#c6b8ea;margin:0 0 13px;font-weight:500}
+.report-insight strong{display:block;font:22px/1.6 'Gowun Batang',serif;color:var(--paper);margin-bottom:12px}
+.report-insight p{font-size:16px;line-height:1.95;margin:0;color:#ded7e9;word-break:keep-all;overflow-wrap:anywhere}
+.report-data-note{font-size:14px;line-height:1.9;color:#b7b0c9;margin:16px 0;overflow-wrap:anywhere}
+.natal-table-wrap{width:100%;overflow-x:auto;margin:26px 0}
+.natal-table{border-collapse:separate;border-spacing:4px;width:100%;table-layout:fixed;text-align:center}
+.natal-table th{font-size:14px;font-weight:500;color:#c8c1d8;padding:10px 2px}
+.natal-table td{background:#ffffff05;border:1px solid #c6b8ea22;border-radius:10px;padding:15px 2px;vertical-align:top}
+.natal-table .day-column{border-color:#c6b8ea99;background:#c6b8ea13;color:#e9e0ff}
+.natal-char{display:block;margin:5px 0 10px;font:clamp(25px,7vw,33px)/1.3 'Gowun Batang',serif}
+.natal-char small{display:block;font:14px/1.7 'Noto Sans KR',sans-serif;margin-top:6px}
+.natal-unknown{font-size:16px;color:#a9a2bb}.natal-candidate{font-size:12px;color:#b3abc4;display:block;margin-bottom:10px}
+.report-subheading{font:23px/1.6 'Gowun Batang',serif;margin:34px 0 22px;color:#ece4f9}
+.element-bars{display:grid;gap:17px;text-align:left;margin:0 auto;max-width:500px}
+.element-bar{display:grid;grid-template-columns:25px minmax(0,1fr) 52px;gap:12px;align-items:center;font-size:15px}
+.element-track{position:relative;height:10px;background:#ffffff09;border-radius:999px;overflow:hidden}
+.element-fill,.element-range{position:absolute;left:0;top:0;height:100%;background:var(--element-color);border-radius:inherit}
+.element-range{opacity:.3}.element-amount{text-align:right;color:#ded7e9}
+.polarity-counts{display:flex;justify-content:center;flex-wrap:wrap;gap:12px}
+.polarity-counts span{font-size:16px;color:#ddd5ec;padding:12px 20px;border:1px solid #c6b8ea3d;border-radius:12px}
+.graph-summary{font-size:15px;margin-bottom:12px}
+.report-chapters{list-style:none;counter-reset:chapter;margin:28px 0;padding:0;text-align:left}
+.report-chapters li{counter-increment:chapter;border-top:1px solid #c6b8ea26;padding:21px 0;display:grid;grid-template-columns:25px minmax(0,1fr);gap:10px}
+.report-chapters li:before{content:counter(chapter,decimal-leading-zero);font-size:12px;color:var(--lav);padding-top:6px}
+.report-chapters strong{font-size:16px;font-weight:500;color:#e5ddec;display:block;line-height:1.7}
+.report-chapters p{font-size:14px;line-height:1.9;color:#bdb5ce;margin:6px 0 0}.report-chapters small{font-size:12px;color:#c5b793;display:block;margin-top:6px}
+.report-price{font-size:24px;color:#e9e1f9;margin:30px 0 20px}.report-price small{font-size:14px;display:block;color:#bab2cb;margin-bottom:8px}
+.report-offer .primary:disabled{opacity:.5;cursor:not-allowed}
+.report-share{border-top:1px solid #c6b8ea30;padding:44px 0 28px;text-align:center}
+.report-share>p{font-size:14px;line-height:1.9;color:#bdb6cc}
+.report-share-actions{display:grid;gap:12px;margin-top:26px}
+.share-secondary{font:16px 'Noto Sans KR',sans-serif;min-height:56px;background:transparent;border:1px solid #c6b8ea88;color:var(--lav);border-radius:12px}
+.report-share button:disabled{opacity:.45;cursor:wait}
+.report-disclaimer{font-size:13px;line-height:1.9;color:#aaa2bb;text-align:center;margin:24px 0 10px}
+.report-section.is-awaiting{opacity:0;transform:translateY(13px)}
+.report-section{transition:opacity .45s ease,transform .45s ease}
+@media(max-width:380px){.report-section{padding-top:38px}.report-insight{padding:23px 16px}.natal-table{border-spacing:2px}.element-bar{gap:8px}.report-section .report-card-artwork{width:min(100%,290px)}}
+@media(prefers-reduced-motion:reduce){.report-section{transition:none}.report-section.is-awaiting{opacity:1;transform:none}}

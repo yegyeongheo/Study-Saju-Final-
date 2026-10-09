@@ -11,6 +11,7 @@
   <link rel="preload" as="image" href="landscape.webp">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="intake.css">
+  <link rel="stylesheet" href="free-report.css">
   <link rel="stylesheet" href="report-intro.css">
   <script type="module" src="intake.js"></script>
 </head>
@@ -164,34 +165,80 @@
         <h2 id="free-result-status-title">무료 해석 연결 전이에요.</h2>
         <p id="free-result-status-message">현재는 화면 미리보기이며,<br>실제 사주 분석 결과는 아직 제공되지 않아요.</p>
       </div>
-      <section class="report-cards" id="report-cards" aria-label="나의 일주 동물과 공부 유형 카드" hidden>
-        <article class="report-card" aria-labelledby="day-card-title">
-          <p class="report-card-label">01 · 일주 동물</p>
-          <h2 id="day-card-title"></h2>
-          <p class="report-card-caption" id="day-card-pillar"></p>
-          <div class="report-card-artwork">
-            <img id="day-card-image" alt="" decoding="async" hidden>
-            <p class="report-card-placeholder" id="day-card-placeholder"></p>
+      <div id="free-result-content" class="free-report-content" hidden>
+        <div class="report-cards" id="report-cards">
+          <section class="report-section report-card" aria-labelledby="study-section-title">
+            <p class="report-section-number">01 · STUDY TYPE</p>
+            <h2 id="study-section-title">당신의 공부유형은</h2>
+            <h3 class="report-type-name" id="study-card-title"></h3>
+            <p class="report-hanja" id="study-hanja" hidden></p>
+            <p class="report-core-line" id="study-core-line"></p>
+            <div class="report-card-artwork">
+              <img id="study-card-image" alt="" decoding="async" hidden>
+              <p class="report-card-placeholder" id="study-card-placeholder"></p>
+            </div>
+            <p id="study-card-caption" class="visually-hidden"></p>
+            <div class="report-prose" id="study-description"></div>
+            <dl class="report-strengths" id="study-strengths"></dl>
+          </section>
+          <section class="report-section report-card" aria-labelledby="guardian-section-title">
+            <p class="report-section-number">02 · GUARDIAN CARD</p>
+            <h2 id="guardian-section-title">당신의 수호카드</h2>
+            <p class="report-section-intro">타고난 기질을 담은 상징 카드입니다</p>
+            <h3 class="report-type-name" id="day-card-title"></h3>
+            <p class="report-card-caption" id="day-card-pillar"></p>
+            <div class="report-card-artwork">
+              <img id="day-card-image" alt="" decoding="async" hidden>
+              <p class="report-card-placeholder" id="day-card-placeholder"></p>
+            </div>
+            <div class="report-prose" id="guardian-description"></div>
+            <ul class="report-keywords" id="guardian-keywords" aria-label="상징 키워드"></ul>
+            <p class="report-card-symbol" id="day-card-symbol" hidden></p>
+            <p class="card-symbol-note" id="card-symbol-note" hidden>귀·뿔·꼬리는 캐릭터의 외형 표현이에요.<br>토템은 전통 오행에서 영감을 받은 디자인 상징이며,<br>기질 설명은 사주의 세부 특성을 바탕으로 해요.</p>
+          </section>
+        </div>
+        <section class="report-section" aria-labelledby="combined-title">
+          <p class="report-section-number">03 · TWO CARDS, ONE STORY</p>
+          <h2 id="combined-title">두 카드로 읽는 나</h2>
+          <div class="report-prose" id="combined-summary"></div>
+          <div class="report-insights" id="combined-insights"></div>
+        </section>
+        <section class="report-section" aria-labelledby="natal-title">
+          <p class="report-section-number">04 · FOUR PILLARS</p>
+          <h2 id="natal-title">나의 사주 원국</h2>
+          <p class="report-data-note" id="natal-basis"></p>
+          <div class="natal-table-wrap" id="natal-table-wrap">
+            <table class="natal-table" id="natal-table"><caption class="visually-hidden">년주·월주·일주·시주의 천간과 지지</caption></table>
           </div>
-          <p class="report-card-symbol" id="day-card-symbol" hidden></p>
-        </article>
-        <article class="report-card" aria-labelledby="study-card-title">
-          <p class="report-card-label">02 · 공부 유형</p>
-          <h2 id="study-card-title"></h2>
-          <p class="report-card-caption" id="study-card-caption"></p>
-          <div class="report-card-artwork">
-            <img id="study-card-image" alt="" decoding="async" hidden>
-            <p class="report-card-placeholder" id="study-card-placeholder"></p>
+          <h3 class="report-subheading" id="elements-title">내 사주를 이루는 오행</h3>
+          <div class="element-bars" id="element-bars" role="img" aria-label="오행 글자 개수"></div>
+          <h3 class="report-subheading">음양의 구성</h3>
+          <div class="polarity-counts" id="polarity-counts"></div>
+          <p class="report-prose graph-summary" id="element-summary"></p>
+          <p class="report-data-note" id="element-notice"></p>
+        </section>
+        <section class="report-section report-offer" aria-labelledby="paid-report-title">
+          <p class="report-section-number">05 · THE NEXT CHAPTER</p>
+          <h2 id="paid-report-title">공부 운명서 펼치기</h2>
+          <p class="report-prose" id="paid-report-lead"></p>
+          <p class="report-data-note" id="paid-report-scope"></p>
+          <ol class="report-chapters" id="paid-report-chapters"></ol>
+          <p class="report-price" id="paid-report-price"></p>
+          <button type="button" class="primary" id="open-paid-report" disabled>나의 공부 운명서 펼치기</button>
+          <p class="report-data-note" id="paid-report-status" role="status"></p>
+        </section>
+        <section class="report-share" aria-labelledby="share-heading">
+          <h2 id="share-heading">두 장의 카드를 간직하세요</h2>
+          <p>유형 이름과 핵심 문장을 함께 담아요.<br>생년월일·출생시간·이름은 포함하지 않아요.</p>
+          <div class="report-share-actions">
+            <button class="primary" type="button" id="save-result-image" disabled>결과 이미지 저장</button>
+            <button class="share-secondary" type="button" id="share-result-image" disabled>결과 공유하기</button>
           </div>
-        </article>
-        <p class="card-symbol-note" id="card-symbol-note" hidden>토템은 전통 오행에서 영감을 받은<br>공부사주의 디자인 상징이에요.</p>
-      </section>
-      <article class="free-result-content" id="free-result-content" aria-labelledby="free-result-headline" hidden>
-        <p class="result-type" id="free-result-type"></p>
-        <h2 id="free-result-headline"></h2>
-        <p class="result-summary" id="free-result-summary"></p>
-        <ul class="result-strengths" id="free-result-strengths" hidden></ul>
-      </article>
+          <p class="report-data-note" id="result-share-status" role="status" aria-live="polite"></p>
+          <a id="result-image-download" class="back-link" download="studysaju-result.png" hidden>이미지 내려받기</a>
+        </section>
+        <p class="report-disclaimer">사주를 바탕으로 한 자기 이해 콘텐츠입니다.<br>실제 경험과 함께 살펴보세요.</p>
+      </div>
       <button class="primary" id="retry-analysis" type="button" hidden>다시 분석하기</button>
       <button class="back-link home-link" id="result-information" type="button">입력 정보 확인하기</button>
     </section>
