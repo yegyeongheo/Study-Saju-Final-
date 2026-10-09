@@ -1,5 +1,6 @@
 import {createConsentController} from './consent.js';
 import {createReportIntro} from './report-intro.js';
+import {createFreeResultController} from './free-result.js';
 import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPersonalization} from './questionnaire.js';
 
 (() => {
@@ -22,21 +23,28 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   const regions = ['서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원특별자치도', '충청북도', '충청남도', '전북특별자치도', '전라남도', '경상북도', '경상남도', '제주특별자치도', '해외·기타'];
   const studyLabels = {'early-school':'유치·초등', 'secondary-school':'중고등 학교내신', 'college-entrance':'수능•대학입시', 'certification-language':'자격증·어학', 'job-preparation':'취업 준비', 'public-professional':'공무원·전문직', career:'직장인·커리어', 'self-development':'자기계발·취미'};
   const relationLabels = {father:'부', mother:'모', grandparent:'조부모'};
+  const genderLabels = {male:'남성', female:'여성'};
   const personLabels = {child:'아이', self:'본인', guardian:'보호자'};
   const form = document.getElementById('intake-form');
   const consent = createConsentController();
   const sections = Object.fromEntries([...document.querySelectorAll('[data-person]')].map(el => [el.dataset.person, el]));
-  const views = {choose:document.getElementById('choose-view'), input:document.getElementById('details-view'), review:document.getElementById('review-view'), questions:document.getElementById('questions-view'), intro:document.getElementById('report-intro')};
-  const headings = {choose:document.getElementById('choose-title'), input:document.getElementById('details-title'), review:document.getElementById('review-title'), questions:document.getElementById('question-title'), intro:document.getElementById('intro-title')};
+  const views = {choose:document.getElementById('choose-view'), input:document.getElementById('details-view'), review:document.getElementById('review-view'), questions:document.getElementById('questions-view'), intro:document.getElementById('report-intro'), results:document.getElementById('free-result-view')};
+  const headings = {choose:document.getElementById('choose-title'), input:document.getElementById('details-title'), review:document.getElementById('review-title'), questions:document.getElementById('question-title'), intro:document.getElementById('intro-title'), results:document.getElementById('free-result-title')};
   const studyDrafts = {child:'', self:''};
   const answerDrafts = {child:createAnswers(), self:createAnswers()};
   let questionIndex = 0;
   let audience = null;
   let lastPayload = null;
+  let inputDirty = false;
+  let confirmedPayload = null;
+  let introFinishedPayload = null;
+  const freeResult = createFreeResultController();
   const intro = createReportIntro({onOpen:() => {
     if (!lastPayload?.personalization || !consent.isReady()) { go('input'); return; }
-    go('review');
-    // The app can navigate to its actual free report at this presentation boundary.
+    if (confirmedPayload !== lastPayload) { go('review'); return; }
+    introFinishedPayload = lastPayload;
+    go('results');
+    // The free result is revealed only after confirmation and the golden mist.
     window.dispatchEvent(new CustomEvent('studysaju:intro-complete', {detail:lastPayload}));
   }});
 
@@ -80,7 +88,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     fragment.querySelectorAll('[data-field]').forEach(control => {
       const type = control.dataset.field;
       control.name = `${key}-${type}`;
-      control.id = `${key}-${type}${type === 'calendar' ? '-' + control.value : ''}`;
+      control.id = `${key}-${type}${['calendar', 'gender'].includes(type) ? '-' + control.value : ''}`;
       if (control.dataset.caption) control.setAttribute('aria-label', `${personLabels[key]} ${control.dataset.caption}`);
     });
     fragment.querySelectorAll('[data-label]').forEach(label => label.htmlFor = `${key}-${label.dataset.label}`);
@@ -114,6 +122,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   function showView(view, moveFocus = true) {
     consent.closeDialog();
     intro.stop();
+    if (['choose', 'input', 'questions'].includes(view)) clearAnalysis();
     Object.entries(views).forEach(([key, el]) => el.hidden = key !== view);
     document.body.classList.toggle('is-form', view !== 'choose');
     document.body.classList.toggle('is-intro', view === 'intro');
@@ -123,12 +132,31 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     }
     if (view === 'intro') intro.start(audience);
   }
+  function clearAnalysis() {
+    confirmedPayload = null;
+    introFinishedPayload = null;
+    freeResult.reset();
+  }
+  function resolveView(view) {
+    if (!views[view] || view === 'choose' || !audience) return 'choose';
+    if (view === 'input') return view;
+    if (!lastPayload || lastPayload.audience !== audience || inputDirty || !consent.isReady()) return 'input';
+    if (view === 'questions') return view;
+    if (!lastPayload.personalization) return 'questions';
+    if (view === 'review') return view;
+    if (confirmedPayload !== lastPayload) return 'review';
+    if (view === 'results' && introFinishedPayload !== lastPayload) return 'intro';
+    return view;
+  }
+  function viewHash(view) {
+    return view === 'choose' ? '' : view === 'input' ? '#information' : view === 'questions' ? '#question-' + (questionIndex + 1) : view === 'intro' ? '#intro' : view === 'results' ? '#free-result' : '#check';
+  }
   function go(view, step = 0) {
-    if (['questions', 'intro', 'review'].includes(view) && !consent.isReady()) view = 'input';
+    view = resolveView(view);
     if (view === 'questions') renderQuestion(step);
     if (view === 'review') renderReview();
-    const hash = view === 'choose' ? '' : view === 'input' ? '#information' : view === 'questions' ? '#question-' + (questionIndex + 1) : view === 'intro' ? '#intro' : '#check';
-    history.pushState({view, audience, step:view === 'questions' ? questionIndex : null}, '', location.pathname + hash);
+    if (view === 'results') freeResult.render();
+    history.pushState({view, audience, step:view === 'questions' ? questionIndex : null}, '', location.pathname + viewHash(view));
     showView(view);
   }
   const choiceButtons = [...document.querySelectorAll('[data-choice]')];
@@ -152,6 +180,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     cancelChoice();
     selectAudience(next);
     lastPayload = null;
+    inputDirty = false;
     go('input');
   }
   choiceButtons.forEach(button => button.addEventListener('click', () => {
@@ -169,21 +198,36 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   document.getElementById('change-audience').addEventListener('click', () => history.back());
   document.getElementById('edit-information').addEventListener('click', () => go('input'));
   document.getElementById('edit-answers').addEventListener('click', () => go('questions', 0));
+  document.getElementById('start-analysis').addEventListener('click', () => {
+    if (views.review.hidden) return;
+    if (resolveView('review') !== 'review') { go('review'); return; }
+    confirmedPayload = lastPayload;
+    introFinishedPayload = null;
+    freeResult.prepare(lastPayload, studyLabels[lastPayload.study]);
+    intro.reset(audience);
+    go('intro');
+  });
+  document.getElementById('result-information').addEventListener('click', () => go('review'));
+  document.getElementById('retry-analysis').addEventListener('click', () => {
+    if (resolveView('results') !== 'results') { go('review'); return; }
+    freeResult.prepare(lastPayload, studyLabels[lastPayload.study]);
+  });
+  function markInputDirty() {
+    if (lastPayload) { inputDirty = true; clearAnalysis(); }
+  }
+  form.addEventListener('input', markInputDirty);
+  form.addEventListener('change', markInputDirty);
   window.addEventListener('popstate', event => {
     cancelChoice();
     cancelQuestionTransition();
     const state = event.state || {view:'choose'};
     if (state.audience) selectAudience(state.audience);
-    const hasInput = lastPayload && lastPayload.audience === audience && consent.isReady();
-    let view = 'choose';
-    if (audience && ['input', 'questions', 'intro', 'review'].includes(state.view)) view = 'input';
-    if (state.view === 'questions' && hasInput) {
-      view = 'questions';
-      renderQuestion(state.step || 0);
-    }
-    if (['intro', 'review'].includes(state.view) && hasInput) {
-      view = lastPayload.personalization ? state.view : 'questions';
-      if (view === 'review') renderReview(); else if (view === 'questions') renderQuestion(2);
+    const view = resolveView(state.view || 'choose');
+    if (view === 'questions') renderQuestion(state.view === 'questions' ? state.step || 0 : 2);
+    if (view === 'review') renderReview();
+    if (view === 'results') freeResult.render();
+    if (view !== state.view) {
+      history.replaceState({view, audience, step:view === 'questions' ? questionIndex : null}, '', location.pathname + viewHash(view));
     }
     showView(view);
   });
@@ -198,6 +242,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     const selectedTime = birthTimes.find(item => item[0] === field(section, 'time').value);
     return {
       name:field(section, 'name').value.trim(),
+      gender:section.querySelector('[data-field="gender"]:checked').value,
       birthDate:{year:Number(field(section, 'year').value), month:Number(field(section, 'month').value), day:Number(field(section, 'day').value), calendar:calendar(section), isLeapMonth:calendar(section) === 'lunar' && field(section, 'leap').checked},
       birthTime:{period:selectedTime[0], start:selectedTime[2], end:selectedTime[3]},
       birthRegion:field(section, 'region').value
@@ -209,7 +254,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     const list = document.createElement('dl');
     const b = person.birthDate;
     const dateLabel = `${b.year}년 ${b.month}월 ${b.day}일 · ${b.calendar === 'solar' ? '양력' : b.isLeapMonth ? '음력 윤달' : '음력'}`;
-    const entries = [['이름', person.name], ['생년월일', dateLabel], ['태어난 시간', birthTimes.find(time => time[0] === person.birthTime.period)[1]], ['태어난 지역', person.birthRegion]];
+    const entries = [['이름', person.name], ['성별', genderLabels[person.gender]], ['생년월일', dateLabel], ['태어난 시간', birthTimes.find(time => time[0] === person.birthTime.period)[1]], ['태어난 지역', person.birthRegion]];
     if (relationship) entries.unshift(['관계', relationLabels[relationship]]);
     entries.forEach(([label, value]) => {
       const row = document.createElement('div');
@@ -322,9 +367,9 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     const personalization = buildPersonalization(audience, answers);
     transitionQuestion(() => {
       lastPayload.personalization = personalization;
-      intro.reset(audience);
-      go('intro');
-      // Input is ready for report preparation; navigation waits for intro-complete.
+      clearAnalysis();
+      go('review');
+      // The completed answers are ready for review, before the analysis CTA.
       window.dispatchEvent(new CustomEvent('studysaju:intake-ready', {detail:lastPayload}));
     });
   }
@@ -368,7 +413,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     Object.values(sections).filter(section => !section.disabled).forEach(validatePerson);
     if (!form.reportValidity()) return;
     const payload = {
-      schemaVersion:4,
+      schemaVersion:5,
       audience,
       learner:readPerson(audience),
       guardian:audience === 'child' ? {...readPerson('guardian'), relationship:form.querySelector('[name="guardian-relationship"]:checked').value} : null,
@@ -376,6 +421,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
       consent:consent.snapshot()
     };
     lastPayload = payload;
+    inputDirty = false;
     go('questions', 0);
   });
   history.replaceState({view:'choose', audience:null}, '', location.pathname);

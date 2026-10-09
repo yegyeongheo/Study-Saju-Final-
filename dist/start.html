@@ -151,9 +151,27 @@
         <dl id="review-answers"></dl>
         <button class="back-link" type="button" id="edit-answers">답변 수정하기</button>
       </section>
-      <p class="preview-note">현재는 입력·질문 화면 미리보기예요.<br>실제 무료 해석과 마지막 장의 답변은 아직 제공되지 않아요.</p>
-      <button class="primary" type="button" id="edit-information">입력 내용 수정하기</button>
-      <a class="back-link home-link" href="index.html#report">리포트 예시 다시 보기 <span aria-hidden="true">↗</span></a>
+      <p class="review-guidance">입력한 정보가 맞는지 확인해 주세요.<br>이제 공부 운명서의 첫 장을 열어볼까요?</p>
+      <button class="back-link review-edit" type="button" id="edit-information">입력 내용 수정하기</button>
+      <button class="primary review-analyze" type="button" id="start-analysis">타고난 공부 기질 알아보기</button>
+    </section>
+
+    <section class="intake-view free-result-view" id="free-result-view" aria-labelledby="free-result-title" hidden>
+      <p class="eyebrow">STUDY SAJU · FREE REPORT</p>
+      <h1 id="free-result-title" tabindex="-1">공부 운명서의 첫 장</h1>
+      <p class="free-result-context" id="free-result-context"></p>
+      <div class="free-result-status" id="free-result-status" role="status" aria-live="polite">
+        <h2 id="free-result-status-title">무료 해석 연결 전이에요.</h2>
+        <p id="free-result-status-message">현재는 화면 미리보기이며,<br>실제 사주 분석 결과는 아직 제공되지 않아요.</p>
+      </div>
+      <article class="free-result-content" id="free-result-content" aria-labelledby="free-result-headline" hidden>
+        <p class="result-type" id="free-result-type"></p>
+        <h2 id="free-result-headline"></h2>
+        <p class="result-summary" id="free-result-summary"></p>
+        <ul class="result-strengths" id="free-result-strengths" hidden></ul>
+      </article>
+      <button class="primary" id="retry-analysis" type="button" hidden>다시 분석하기</button>
+      <button class="back-link home-link" id="result-information" type="button">입력 정보 확인하기</button>
     </section>
   </main>
   <dialog class="consent-dialog" id="consent-dialog" aria-labelledby="consent-dialog-title" aria-describedby="consent-dialog-intro">
@@ -174,6 +192,13 @@
       <label class="field-label" data-label="name">이름</label>
       <input class="text-input" type="text" data-field="name" placeholder="이름을 입력해 주세요" maxlength="40" required>
     </div>
+    <fieldset class="form-field">
+      <legend class="field-label">성별</legend>
+      <div class="check-options gender-options">
+        <label><input type="radio" data-field="gender" data-caption="성별 남성" value="male" required><span>남성</span></label>
+        <label><input type="radio" data-field="gender" data-caption="성별 여성" value="female" required><span>여성</span></label>
+      </div>
+    </fieldset>
     <fieldset class="form-field birthdate-field">
       <legend class="field-label">생년월일</legend>
       <div class="date-fields">

@@ -1,4 +1,19 @@
 /* Intake uses the landing's navy, lavender and mountain/cloud artwork. */
+.intake-page .gender-options{gap:12px}
+.intake-page .gender-options label{flex:1;justify-content:center;min-height:54px;border:1px solid #c6b8ea45;border-radius:12px;background:#ffffff06}
+.intake-page .gender-options label:has(input:checked){border-color:var(--lav);background:#c6b8ea18;color:var(--paper)}
+.review-guidance{font-size:15px;line-height:1.9;margin-top:30px}
+.review-edit{display:flex;margin:12px auto}
+.review-view>.review-analyze{margin-top:14px}
+.free-result-view{padding-top:48px;min-height:calc(100svh - 100px)}
+.free-result-view h1{overflow-wrap:anywhere}
+.free-result-context{font-size:14px;color:var(--lav);margin:20px 0 38px}
+.free-result-status,.free-result-content{border-top:1px solid #c6b8ea35;padding:36px 0}
+.free-result-status h2,.free-result-content h2{font-size:clamp(23px,6vw,30px);line-height:1.65}
+.free-result-status p,.result-summary{font-size:16px;line-height:2;white-space:pre-line;overflow-wrap:anywhere}
+.result-type{display:inline-block;font-size:15px;color:var(--lav);border:1px solid #c6b8ea60;border-radius:999px;padding:5px 18px;margin:0 0 24px}
+.result-strengths{list-style:none;padding:0;margin:28px 0 0}
+.result-strengths li{padding:17px 0;border-top:1px solid #c6b8ea22;color:#ded7ec;overflow-wrap:anywhere}
 .intake-page{min-height:100svh;isolation:isolate}
 .intake-page [hidden]{display:none!important}
 .intake-landscape{position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,#20243d05,#20243d18 60%,#20243d55),url('landscape.webp') center 64%/cover no-repeat}
