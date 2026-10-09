@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/yegyeongheo/Saju-Core-Engine.git",
+  "commit": "015ce53c416032f164404cbae62e1bda5d9750b3",
+  "buildId": "core-v1.0.0-maintenance-20261009.1",
+  "sourceManifestSha256": "deb4b0fa960809906dfc04cd8695d9f21ef10d7fd558c181f8e6786f2dbde1b9",
+  "python": "3.12.14"
+}

@@ -1,5 +1,5 @@
-// Optional host adapter: window.studySajuAnalyze(payload, {signal}).
-// The standalone preview never invents a type, score, or interpretation.
+import {calculateCore} from './core-client.js';
+// Core calculation is separate from the optional, future report adapter.
 export function validateFreeResult(value) {
   const text = (key, max) => {
     if (typeof value?.[key] !== 'string' || !value[key].trim() || value[key].length > max) {
@@ -18,9 +18,9 @@ export function validateFreeResult(value) {
   return result;
 }
 
-export function createFreeResultController() {
+export function createFreeResultController({calculate = calculateCore} = {}) {
   const el = id => document.getElementById(id);
-  let state = 'unavailable', report = null, generation = 0, controller = null, timer = 0;
+  let state = 'unavailable', report = null, calculation = null, errorCode = null, generation = 0, controller = null, timer = 0;
   function cancel() {
     generation++;
     clearTimeout(timer); timer = 0;
@@ -46,14 +46,19 @@ export function createFreeResultController() {
     }
     const messages = {
       unavailable:['무료 해석 연결 전이에요.', '현재는 화면 미리보기이며,\n실제 사주 분석 결과는 아직 제공되지 않아요.'],
+      calculated:['사주 계산이 완료됐어요.', '계산 결과를 정상적으로 받았어요.\n무료 해석은 준비 중이에요.'],
       loading:['공부 운명서의 첫 장을 준비하고 있어요.', '잠시만 기다려 주세요.'],
       error:['분석을 완료하지 못했어요.', '잠시 후 다시 시도해 주세요.\n입력한 정보는 그대로 남아 있어요.']
     };
     el('free-result-status-title').textContent = messages[state][0];
     el('free-result-status-message').textContent = messages[state][1];
+    if (state === 'error' && errorCode === 'BIRTH_PLACE_REQUIRED') {
+      el('free-result-status-message').textContent = '해외·기타 출생지는 정확한 위치와 시간대가 필요해요.\n현재 입력 화면에서는 국내 출생지만 계산할 수 있어요.';
+    }
   }
   function reset() {
-    cancel(); report = null; state = 'unavailable';
+    cancel(); report = null; calculation = null; errorCode = null; state = 'unavailable';
+    window.dispatchEvent(new CustomEvent('studysaju:core-cleared'));
     ['free-result-type','free-result-headline','free-result-summary'].forEach(id => el(id).textContent = '');
     el('free-result-strengths').replaceChildren();
     render();
@@ -64,7 +69,6 @@ export function createFreeResultController() {
       ? `${payload.learner.name}의 공부 운명서` : `${payload.learner.name}님의 공부 운명서`;
     el('free-result-context').textContent = studyLabel;
     const analyze = window.studySajuAnalyze;
-    if (typeof analyze !== 'function') return;
     state = 'loading'; render();
     const request = generation;
     controller = new AbortController();
@@ -76,20 +80,28 @@ export function createFreeResultController() {
     // A private snapshot prevents host-side mutation of the editable form draft.
     Promise.resolve().then(() => {
       if (request !== generation) return;
-      return analyze(JSON.parse(JSON.stringify(payload)), {signal});
-    }).then(value => {
+      return calculate(JSON.parse(JSON.stringify(payload)), {signal});
+    }).then(async value => {
       if (request !== generation) return;
-      report = validateFreeResult(value);
+      calculation = value;
+      window.dispatchEvent(new CustomEvent('studysaju:core-ready', {detail:structuredClone(calculation)}));
+      if (request !== generation) return;
+      if (typeof analyze === 'function') {
+        const reportValue = await analyze(JSON.parse(JSON.stringify(payload)), {signal, calculation:structuredClone(calculation)});
+        if (request !== generation) return;
+        report = validateFreeResult(reportValue);
+      }
       clearTimeout(timer); timer = 0; controller = null;
-      state = 'ready'; render();
-    }).catch(() => {
+      state = report ? 'ready' : 'calculated'; render();
+    }).catch(error => {
       if (request !== generation) return;
       clearTimeout(timer); timer = 0; controller = null;
+      errorCode = error?.code;
       state = 'error'; render();
     });
   }
   window.addEventListener('pagehide', () => {
-    if (state === 'loading') { cancel(); state = 'error'; render(); }
+    reset();
   });
-  return {prepare, reset, render};
+  return {prepare, reset, render, getCalculation:() => calculation ? structuredClone(calculation) : null};
 }
