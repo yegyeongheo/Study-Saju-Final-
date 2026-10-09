@@ -128,7 +128,7 @@ export function createSpiritualEnergy(canvas) {
   function play() {
     stop(); running = true; canvas.hidden = false; elapsed = 0; lastPaint = -Infinity; resize();
     brushes ||= [
-      [makeBrush([69, 151, 239]), makeBrush([174, 223, 255])],
+      [makeBrush([239, 190, 98]), makeBrush([255, 235, 181])],
       [makeBrush([234, 174, 73]), makeBrush([255, 225, 161])]
     ];
     lastTime = performance.now();

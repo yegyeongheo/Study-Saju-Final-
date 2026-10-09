@@ -1,6 +1,6 @@
 # 공부사주 · Study Saju
 
-모바일 중심의 네이비·라벤더 랜딩페이지와 학습 비책 입력 화면입니다. 최신 버전은 **v5.6 — 푸른빛·금빛 영기**입니다.
+모바일 중심의 네이비·라벤더 랜딩페이지와 학습 비책 입력 화면입니다. 최신 버전은 **v5.7 — 금빛 영기**입니다.
 
 ## 포함된 화면
 
@@ -8,7 +8,7 @@
 - 자녀 / 본인 선택 및 대상별 생년월일·생시·지역 입력
 - 공부 종류 8개 선택(2열·4행)과 대상별 개인화 질문 3단계
 - 필수 개인정보 동의, 자녀 법정대리인 동의 및 상세 안내 모달
-- 자녀 / 본인별 무료 해석 인트로 4장, 탭 전환·건너뛰기·푸른빛·금빛 영기 안개 CTA 전환
+- 자녀 / 본인별 무료 해석 인트로 4장, 탭 전환·건너뛰기·금빛 영기 안개 CTA 전환
 - 입력 내용과 답변 확인 화면
 
 ## 실행하기
@@ -31,7 +31,7 @@ JavaScript 모듈을 사용하므로 HTML 파일을 직접 더블클릭하는 �
 | `dist/index.html`, `style.css`, `app.js` | 랜딩페이지와 스크롤 연출 |
 | `dist/start.html`, `intake.css`, `intake.js` | 대상 선택, 정보 입력과 단계 이동 |
 | `dist/questionnaire.js` | 개인화 질문과 답변 데이터 |
-| `dist/report-intro.js`, `report-intro.css` | 무료 해석 인트로 문구·자동 재생·푸른빛·금빛 영기 전환 |
+| `dist/report-intro.js`, `report-intro.css` | 무료 해석 인트로 문구·자동 재생·금빛 영기 전환 |
 | `dist/consent.js` | 동의 UI, 상태 및 교체 가능한 정책 문구 |
 | `dist/landscape.webp`, `report-stack.webp` | 사용 중인 배경·리포트 이미지 |
 | `dist/third-party-licenses.txt` | 포함 아이콘의 라이선스 |
@@ -47,6 +47,6 @@ JavaScript 모듈을 사용하므로 HTML 파일을 직접 더블클릭하는 �
 
 ## 가져온 버전
 
-- 원본 소스 기준: `a109b78ead0ef942651a0acb16c7d9f732d895fe`
+- 원본 소스 기준: `3bfcb0beb853f538ceb88f0a8b9eb7fc065babed`
 - 실행에 필요한 현재 소스와 사용 중인 이미지를 포함했습니다.
 - 이전 시안의 미사용 `study-report.png`와 원본 Sites 전용 호스팅 설정은 제외했습니다.
