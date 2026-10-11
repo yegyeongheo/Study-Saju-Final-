@@ -66,7 +66,9 @@ export function createFreeResultController({calculate = calculateCore, createVie
   function prepare(payload, studyLabel) {
     reset();
     // Display model only needs gender, time-known flag, and questionnaire option IDs.
-    cardSubject = {audience:payload.audience, learner:{gender:payload?.learner?.gender,
+    const birthYear=payload.learner?.birthDate?.year;
+    const ageBand=Number.isInteger(birthYear)&&new Date().getFullYear()-birthYear<7?'preschool':'school-or-adult';
+    cardSubject = {audience:payload.audience, study:payload.study, learner:{ageBand,gender:payload?.learner?.gender,
       birthTime:{isUnknown:payload?.learner?.birthTime?.isUnknown,period:payload?.learner?.birthTime?.period}},
       personalization:{environment:{id:payload.personalization?.environment?.id},focus:{id:payload.personalization?.focus?.id}}};
     el('free-result-title').textContent = payload.audience === 'child'

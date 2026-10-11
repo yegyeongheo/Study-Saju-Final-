@@ -40,9 +40,10 @@ test('boundary candidates produce count ranges instead of an arbitrary chart',()
 test('interpretation chooses stable detailed traits and separates questionnaire context from calculation',()=>{
   const core=calculation(),before=JSON.stringify(core),self=composeFreeReport(core,payload);
   assert.equal(self.type,null);assert.equal(self.strengths.length,2);assert.equal(self.temperament.sentences.length,2);assert.equal(self.temperament.keywords.length,3);
-  assert.ok(self.summary.length>=3&&self.summary.length<=5);assert.equal(self.trap.id,'pressure_sensitivity');assert.match(self.key.text,/일과 공부를 병행/);
+  assert.ok(self.summary.length>=2&&self.summary.length<=4);assert.equal(self.trap.id,'pressure_sensitivity');assert.match(self.key.text,/일과 공부를 병행/);
   const child=composeFreeReport(core,{...payload,audience:'child',personalization:{focus:{id:'stress'}}});
-  assert.match(child.key.text,/아이와/);assert.notEqual(child.summary.at(-1),self.summary.at(-1));
+  assert.match(child.key.text,/아이와/);assert.notEqual(child.summary[0],self.summary[0]);
+  assert.equal(self.interpretation.plan.selected,'analysis-with-planning');
   assert.equal(JSON.stringify(core),before);
   const uncertain=composeFreeReport(calculation([candidate(),candidate(base,{...high,analytical:'LOW',independence:'LOW'})]),payload);
   assert.equal(uncertain.strengths.some(s=>s.id==='analytical'),false);assert.equal(uncertain.temperament,null);

@@ -9,6 +9,8 @@
 .report-hanja{font:25px/1.7 'Gowun Batang',serif;letter-spacing:4px;color:#e0cb95;margin:5px 0 14px}
 .report-core-line{font-size:18px;line-height:1.9;margin:14px auto 28px;max-width:29ch;color:#f5efff;word-break:keep-all;overflow-wrap:anywhere}
 .report-section .report-card-artwork{width:min(100%,310px);margin:28px auto 30px}
+.report-section:first-child .report-card-artwork{aspect-ratio:3/4}
+.report-type-pain{font:18px/1.9 'Gowun Batang',serif;color:var(--lav);max-width:29ch;margin:30px auto;word-break:keep-all;overflow-wrap:anywhere}
 .report-section-intro,.report-section .report-card-caption{font-size:15px;line-height:1.9;color:#c8c1d8}
 .report-prose{font-size:16px;line-height:2;word-break:keep-all;overflow-wrap:anywhere;margin:28px auto;color:#ded9e8;max-width:520px}
 .report-prose p{margin:0 0 10px}.report-prose p:last-child{margin-bottom:0}
@@ -59,3 +61,27 @@
 .report-section{transition:opacity .45s ease,transform .45s ease}
 @media(max-width:380px){.report-section{padding-top:38px}.report-insight{padding:23px 16px}.natal-table{border-spacing:2px}.element-bar{gap:8px}.report-section .report-card-artwork{width:min(100%,290px)}}
 @media(prefers-reduced-motion:reduce){.report-section{transition:none}.report-section.is-awaiting{opacity:1;transform:none}}
+/* Long-form interpretation: stable single column, generous paragraph separation. */
+.report-story-headline{font:clamp(23px,5.8vw,29px)/1.65 'Gowun Batang',serif;color:#e8d8a7;max-width:28ch;margin:28px auto;word-break:keep-all;overflow-wrap:anywhere}
+.report-story-source{font-size:14px;line-height:1.9;color:#bcb3cc;max-width:520px;margin:0 auto 26px;word-break:keep-all;overflow-wrap:anywhere}
+#combined-summary,.report-insight p{text-align:left}
+#combined-summary p{margin-bottom:24px}
+.report-insight p+p{margin-top:18px}
+.report-story-source:empty,.report-story-headline:empty{display:none}
+/* A continuous reading experience: opening, development, turn, resolution. */
+#combined-summary{font-size:17px;line-height:1.95;margin:28px auto 38px}
+.report-story-body{display:block;text-align:left;max-width:520px;margin:0 auto}
+.report-story-part{padding:32px 0;border-top:1px solid #c6b8ea26}
+.report-story-part h3{font:clamp(21px,5.2vw,26px)/1.6 'Gowun Batang',serif;letter-spacing:-.02em;color:#efe5fa;margin:0 0 22px;word-break:keep-all;overflow-wrap:anywhere}
+.report-story-part p{font-size:16px;line-height:1.95;color:#ded9e8;margin:0 0 20px;word-break:keep-all;overflow-wrap:anywhere}
+.report-story-part p:last-child{margin-bottom:0}
+.report-story-part strong{color:#f3e1ac;font-weight:600}
+.report-story-turn h3{color:#e1cda0}
+.report-story-resolution{padding:28px 24px;background:#c6b8ea0b;border:1px solid #c6b8ea32;border-radius:14px;margin-top:6px}
+.report-story-closing{font:clamp(20px,5vw,24px)/1.85 'Gowun Batang',serif;color:#e8d8a7;max-width:29ch;margin:38px auto 26px;word-break:keep-all;overflow-wrap:anywhere}
+.report-story-closing:empty{display:none}
+.report-evidence{max-width:520px;margin:32px auto 0;border-top:1px solid #c6b8ea26;text-align:left;padding-top:20px}
+.report-evidence summary{font-size:14px;line-height:1.8;color:#c6bad7;cursor:pointer;min-height:40px}
+.report-evidence summary:focus-visible{outline:2px solid #d5bd79;outline-offset:5px;border-radius:3px}
+.report-evidence .report-story-source{margin:10px 0 0;font-size:14px}
+@media(max-width:380px){.report-story-resolution{padding:23px 17px}.report-story-part p{line-height:1.9}}

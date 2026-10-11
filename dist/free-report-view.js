@@ -92,24 +92,46 @@ export function createFreeReportView({createShare=createResultShare,offer=REPORT
     el('study-hanja').hidden=!model.type;el('study-hanja').textContent=model.type?.hanja||'';
     el('study-core-line').textContent=model.type?.headline||'공부유형 판정 기준을 연결하고 있어요.';
     paragraphs('study-description',model.type?.description||['아래에서는 현재 확인된 사주의 세부 특성을 먼저 살펴볼 수 있어요.']);
+    el('study-type-pain').hidden=!model.type?.pain;
+    el('study-type-pain').textContent=model.type?.pain?(child?model.type.pain.replaceAll('나에게','아이에게'):model.type.pain):'';
     el('study-strengths').replaceChildren();
     for(const strength of model.strengths){const row=node('div');row.append(node('dt',strength.keyword),node('dd',strength.summary));el('study-strengths').append(row);}
     if(model.strengths.length<2)el('study-strengths').append(node('div','대표 강점을 두 가지로 확정하기에는 일관된 특성 정보가 부족해요.','report-data-note'));
-    paragraphs('guardian-description',model.temperament?model.temperament.sentences.map((s,i)=>i===0?`${child?'아이에게는':'당신에게는'} ${s.replace('기질로 읽힙니다.','기질이 읽힙니다.')}`:s):['현재 정보에서 한 가지 기질로 단정하기 어려워요. 일상에서 편안하게 선택하는 방식을 함께 살펴보세요.']);
-    el('guardian-keywords').replaceChildren(...(model.temperament?.keywords||[]).map(t=>node('li',t)));
-    paragraphs('combined-summary',model.summary.length>=3?model.summary:['두 카드와 세부 특성을 연결한 해석은 충분한 결과가 확인되면 보여드릴게요.','지금은 아래에서 확인 가능한 특성과 오늘 적용할 방법을 먼저 살펴보세요.']);
+    paragraphs('guardian-description',model.guardianDescription||model.temperament?.sentences||['출생 정보를 확인하면 일주의 기질을 읽어드립니다.']);
+    el('guardian-keywords').replaceChildren(...(model.guardianKeywords||model.temperament?.keywords||[]).map(t=>node('li',t)));
+    el('combined-headline').textContent=model.interpretation.headline||'';
+    el('combined-source').textContent=model.interpretation.source||'';
+    el('combined-source-details').hidden=!model.interpretation.source;
+    paragraphs('combined-summary',model.interpretation.story?.opening|| (model.summary.length?model.summary:['두 카드와 세부 특성을 연결한 해석은 충분한 결과가 확인되면 보여드릴게요.','지금은 아래에서 확인 가능한 특성과 오늘 적용할 방법을 먼저 살펴보세요.']));
     el('combined-insights').replaceChildren();
-    const insights=[
-      [child?'아이의 공부 무기':'나의 공부 무기',model.weapon?.keyword||'강점을 살펴보는 중',model.weapon?(child?`아이의 공부에서 관찰해 보세요. ${model.weapon.scene}`:model.weapon.scene):'현재 정보만으로 대표 강점을 확정하기 어려워요.'],
-      [child?'아이의 공부 함정':'나의 공부 함정',model.trap?.keyword||'막히는 순간을 살펴보는 중',model.trap?.scene||'막히는 지점을 한 가지로 단정하지 않았어요. 공부를 멈추게 되는 상황을 기록해 보세요.'],
+    const fallbackInsights=[
+      [child?'아이의 공부 무기':'나의 공부 무기',model.weapon?.keyword||'강점을 살펴보는 중',model.weapon?(child?`${model.weapon.scene} ${model.weapon.summary} 이해한 내용을 다음 과제에 직접 적용하는 순간까지 이어 주세요.`:model.weapon.scene):'현재 정보만으로 대표 강점을 확정하기 어려워요.'],
+      [child?'아이의 공부 함정':'나의 공부 함정',model.trap?.keyword||'막히는 순간을 살펴보는 중',model.trap?.scene||'공부를 시작하는 순간과 멈추는 순간을 함께 살펴보세요. 배움의 흐름을 바꾸는 단서가 그 사이에 있습니다.'],
       [child?'아이를 움직이는 열쇠':'나를 움직이는 열쇠',model.key.keyword,model.key.text]
     ];
-    for(const [label,title,text] of insights){const box=node('article',undefined,'report-insight');box.append(node('h3',label),node('strong',title),node('p',text));el('combined-insights').append(box);}
+    const story=model.interpretation.story;
+    const insights=story?.sections||(model.interpretation.insights.length?model.interpretation.insights:fallbackInsights.map(([label,title,text])=>({label,title,paragraphs:[text]})));
+    for(const {label,title,paragraphs:body,role,emphasis} of insights){
+      const box=node('article',undefined,story?`report-story-part report-story-${role}`:'report-insight');
+      if(label)box.append(node('p',label,'report-story-eyebrow'));
+      box.append(node('h3',title));
+      for(const text of body){
+        const p=node('p');
+        const at=emphasis?text.indexOf(emphasis):-1;
+        if(at<0)p.textContent=text;
+        else {if(at)p.append(node('span',text.slice(0,at)));p.append(node('strong',emphasis));if(at+emphasis.length<text.length)p.append(node('span',text.slice(at+emphasis.length)));}
+        box.append(p);
+      }
+      el('combined-insights').append(box);
+    }
+    el('combined-closing').textContent=story?.closing||'';
     renderNatal(model.natal);renderOffer(model);reveal();sharing.prepare(shareSnapshot(model,payload.learner?.gender));
   }
   function reset(){
     lastCalculation=lastReport=lastPayload=null;clearReveal();sharing.reset();cards.reset();
-    for(const id of ['study-hanja','study-core-line','study-description','study-strengths','guardian-description','guardian-keywords','combined-summary','combined-insights','natal-table','element-bars','polarity-counts','natal-basis','element-summary','element-notice','paid-report-lead','paid-report-chapters','paid-report-price','paid-report-status'])el(id).replaceChildren();
+    for(const id of ['study-type-pain','combined-closing','combined-headline','combined-source','study-hanja','study-core-line','study-description','study-strengths','guardian-description','guardian-keywords','combined-summary','combined-insights','natal-table','element-bars','polarity-counts','natal-basis','element-summary','element-notice','paid-report-lead','paid-report-chapters','paid-report-price','paid-report-status'])el(id).replaceChildren();
+    el('combined-source-details').hidden=true;
+    el('combined-source-details').removeAttribute('open');
     el('open-paid-report').disabled=true;el('open-paid-report').onclick=null;
   }
   return {render,reset,reveal};

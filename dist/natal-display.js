@@ -39,6 +39,6 @@ export function buildNatalDisplay(calculation, payload) {
   const columns=PILLARS.map(([key,label])=>({key,label,unknown:unknown&&key==='hour',values:unknown&&key==='hour'?[]:[...new Set(rows.map(row=>row[key].value))].map(pillarInfo)}));
   const varied=columns.some(column=>column.values.length>1);
   return {status:'ready',unknown,total:keys.length*2,columns,ranges,varied,
-    notice:unknown?'시주를 제외한 여섯 글자의 오행 구성입니다. 실제 오행의 힘과는 차이가 있을 수 있어요.':'사주 여덟 글자의 오행 구성입니다. 실제 오행의 힘과는 차이가 있을 수 있어요.',
-    summary:varied?'출생 정보에 따라 원국 후보가 있어요. 아래 개수는 가능한 구성의 범위이며, 특정 후보를 임의로 고르지 않았어요.':`${ELEMENT_ORDER.map(key=>`${ELEMENT_LABELS[key]} ${ranges[key].min}개`).join(' · ')}로 구성돼요. 글자의 배치를 보여주는 집계이며, 성격이나 공부 능력의 순위를 뜻하지 않아요.`};
+    notice:unknown?'시주를 제외한 여섯 글자의 오행 구성입니다. 천간·지지의 표면 오행 개수 기준입니다.':'사주 여덟 글자의 오행 구성입니다. 천간·지지의 표면 오행 개수 기준입니다.',
+    summary:varied?'출생 정보에 따라 원국 후보가 있어요. 아래 개수는 가능한 구성의 범위이며, 특정 후보를 임의로 고르지 않았어요.':`${ELEMENT_ORDER.map(key=>`${ELEMENT_LABELS[key]} ${ranges[key].min}개`).join(' · ')}로 구성돼요. 천간과 지지에 놓인 오행의 구성을 보여줍니다.`};
 }
