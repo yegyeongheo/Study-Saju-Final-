@@ -95,7 +95,11 @@ STUDY_TYPES[typeId] = {
 
 `REPORT_OFFER` 기본은 `price:null`, `available:false`, `cycleVerified:false`, `providedChapters:[]`입니다. 현재 10개 장은 제공 예정 목차이며 판매 중인 상품으로 표시하지 않습니다.
 
-확정 가격(원), 실제 제공하는 장 번호(1–10), 출시 상태를 설정하고 통합 앱의 `window.studySajuCheckout({audience})`를 연결해야 버튼이 열립니다. 9장을 제공 항목에 넣으려면 별도로 `cycleVerified:true`여야 합니다. 타임라인 계산을 받았다는 이유만으로 시기 해석 상품이 완성됐다고 판정하지 마세요. 가격·제공 범위·결제 권한은 실제 서버에서 다시 검증해야 합니다. 이 콜백 자체에는 개인정보나 원국이 전달되지 않습니다.
+장별 실제 제공 인증은 `report-readiness.js`의 대상별 allowlist와 `reports/verification-evidence.json`으로 관리합니다. `providedChapters`는 자녀용·본인용 검증 장의 교집합에서 파생하며 현재 빈 목록입니다. 숫자를 수동으로 추가하거나 `cycleVerified:true`만 설정해도 구매는 열리지 않습니다.
+
+이 상품은 검증된 10장 전체, 별도 Cycle 검증, 서버 결제·전달 검증, 확정 가격, 판매 상태와 checkout 연결을 모두 요구합니다. UI는 렌더·클릭·종료 시 검사하며, 서버는 추후 자체 상품·주문·입력 검증을 구현해야 합니다. 현재 결제 API나 유료 본문 생성기는 없습니다. 9장은 연결·해석 검증이 완료될 때까지 중립적인 미제공 안내만 표시합니다.
+
+장별 계산 입력, 필요한 해석 모듈, 미구현 기능과 수용 검사 조건은 [PAID_REPORT_READINESS.md](PAID_REPORT_READINESS.md)를 따릅니다. `npm test`와 `npm run verify:report`를 실행합니다. 가격·판매 상태는 이번 검증에서 변경하지 않았습니다.
 
 ## 저장·공유와 수명
 

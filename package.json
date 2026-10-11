@@ -2,5 +2,5 @@
   "name": "study-saju",
   "private": true,
   "type": "module",
-  "scripts": {"test": "node --test tests/core-client.test.js tests/free-result.test.js"}
+  "scripts": {"test": "node --test tests/*.test.js", "verify:report": "node scripts/verify-report-release.mjs"}
 }

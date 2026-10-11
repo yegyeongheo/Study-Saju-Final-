@@ -2,6 +2,7 @@ import {createReportCards} from './report-cards.js';
 import {composeFreeReport} from './free-report-model.js';
 import {ELEMENT_ORDER,ELEMENT_LABELS} from './natal-display.js';
 import {REPORT_OFFER,REPORT_CHAPTERS,REPORT_CHAPTER_DETAILS} from './report-offer.js';
+import {validateReportOffer} from './report-readiness.js';
 import {createResultShare,shareSnapshot} from './result-share.js';
 
 const color={wood:'#83bba8',fire:'#d4989b',earth:'#d2bb7d',metal:'#c7c5db',water:'#93a9d0'};
@@ -60,14 +61,15 @@ export function createFreeReportView({createShare=createResultShare,offer=REPORT
     el('element-summary').textContent=natal.summary;el('element-notice').textContent=natal.notice;
   }
   function renderOffer(model){
-    const child=model.audience==='child',available=offer.available&&Number.isFinite(offer.price)&&offer.price>=0&&offer.providedChapters.length>0&&(!offer.providedChapters.includes(9)||offer.cycleVerified)&&typeof window.studySajuCheckout==='function';
+    const readiness=()=>validateReportOffer(offer,model.audience,typeof window.studySajuCheckout==='function');
+    const verified=readiness(),child=model.audience==='child',available=verified.purchasable;
     el('paid-report-lead').textContent=model.purchaseLead;
     el('paid-report-scope').textContent=available?'구매 시 제공되는 항목을 아래에서 확인해 주세요.':'아래는 준비 중인 10개 장의 구성입니다. 현재 유료 리포트 제공과 결제는 시작 전이에요.';
     el('paid-report-chapters').replaceChildren();
     REPORT_CHAPTERS[model.audience].forEach((title,index)=>{
       const row=node('li'),content=node('div');content.append(node('strong',title),node('p',REPORT_CHAPTER_DETAILS[model.audience][index]));
-      if(index===8&&!offer.cycleVerified)content.append(node('small','시기 해석 연결·검증 후 제공 범위 확정'));
-      else if(available)content.append(node('small',offer.providedChapters.includes(index+1)?'구매 시 제공':'제공 준비 중 · 구매 항목 제외'));
+      if(index===8&&!verified.cycleVerified)content.append(node('small','시기 해석 연결·검증 미완료로 현재 제공하지 않습니다.'));
+      else if(available)content.append(node('small',verified.providedChapters.includes(index+1)?'구매 시 제공':'제공 준비 중 · 구매 항목 제외'));
       row.append(content);el('paid-report-chapters').append(row);
     });
     const price=el('paid-report-price');price.replaceChildren(node('small',available?'이용 가격':'출시 예정 가격'));
@@ -75,8 +77,9 @@ export function createFreeReportView({createShare=createResultShare,offer=REPORT
     const button=el('open-paid-report');button.textContent=child?'우리 아이 공부 운명서 펼치기':'나의 공부 운명서 펼치기';button.disabled=!available;
     el('paid-report-status').textContent=available?'':'실제 제공 항목이 확정되면 열려요.';
     button.onclick=available?async()=>{
+      if(!readiness().purchasable){button.disabled=true;return;}
       button.disabled=true;
-      try{await window.studySajuCheckout({audience:model.audience});}catch{el('paid-report-status').textContent='구매 안내를 열지 못했어요. 다시 시도해 주세요.';}finally{button.disabled=false;}
+      try{await window.studySajuCheckout({audience:model.audience});}catch{el('paid-report-status').textContent='구매 안내를 열지 못했어요. 다시 시도해 주세요.';}finally{button.disabled=!readiness().purchasable;}
     }:null;
   }
   function render(calculation,payload,report){

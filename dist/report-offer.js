@@ -1,5 +1,7 @@
-// Set the confirmed price and supplied chapters before enabling a real checkout.
-export const REPORT_OFFER=Object.freeze({price:null,currency:'KRW',available:false,cycleVerified:false,providedChapters:[]});
+import {verifiedChapters} from './report-readiness.js';
+// Shared offer can list only chapters verified for BOTH audiences.
+export const REPORT_OFFER=Object.freeze({price:null,currency:'KRW',available:false,cycleVerified:false,
+  providedChapters:Object.freeze(verifiedChapters('child').filter(n=>verifiedChapters('self').includes(n)))});
 export const REPORT_CHAPTERS={
  child:['우리 아이의 공부 체질','집중력과 실행력','아이를 움직이는 동기','성적을 만드는 공부법','스트레스와 회복','부모가 알아야 할 지도법','학원,학교,교육환경','진로,전공,예체능','학업운, 시험운, 합격운 흐름','우리 아이 맞춤 실행 가이드'],
  self:['나의 공부 체질','집중력과 루틴','나를 움직이는 동기','성적을 만드는 공부법','스트레스와 회복 전략','시험에서 실력을 발휘하는 법','공부환경과 선택','진로,전공,직업','공부운,시험운,합격운','나만의 실행 전략']

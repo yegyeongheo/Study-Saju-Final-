@@ -111,3 +111,17 @@ test('image export ignores stale asynchronous results and revokes previous priva
   assert.equal(nodes.get('save-result-image').disabled,false);assert.match(nodes.get('result-image-download').href,/^blob:/);
   controller.reset();assert.equal(nodes.get('result-image-download').href,undefined);assert.equal(nodes.get('share-result-image').disabled,true);
 });
+
+test('forged offer flags cannot enable checkout or advertise chapter 9 as supplied',()=>{
+  for(const audience of ['child','self']) for(const providedChapters of [[1],Array.from({length:10},(_,i)=>i+1)]) {
+    const nodes=dom();let calls=0;window.studySajuCheckout=()=>{calls++;};
+    const view=createFreeReportView({createShare:()=>({prepare(){},reset(){}}),
+      offer:{available:true,price:9900,currency:'KRW',cycleVerified:true,providedChapters}});
+    view.render(calculation(),{...payload,audience},null);
+    assert.equal(nodes.get('open-paid-report').disabled,true);
+    assert.equal(nodes.get('open-paid-report').onclick,null);
+    assert.match(nodes.get('paid-report-chapters').children[8].textContent,/현재 제공하지 않습니다/);
+    assert.doesNotMatch(nodes.get('paid-report-chapters').textContent,/구매 시 제공/);
+    assert.equal(calls,0);
+  }
+});
