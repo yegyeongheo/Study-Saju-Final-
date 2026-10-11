@@ -1,3 +1,4 @@
+import {applyFixedStudyTypeCopy} from './study-type-copy.js';
 import {learnerResult,buildNatalDisplay} from './natal-display.js';
 import {resolveDayAnimalCard} from './report-cards.js';
 import {selectApprovedType} from './study-type-rules.js';
@@ -19,7 +20,7 @@ export function traitSignals(calculation) {
 const matches=(block,traits)=>traits[block.id]?.levels.every(level=>(block.band==='high'?['HIGH','VERY_HIGH']:['LOW','VERY_LOW']).includes(level));
 const safeText=(value,max=600)=>typeof value==='string'&&value.trim()&&value.length<=max?value.trim():null;
 export function suppliedStudyType(report) {
-  const src=report?.studyType || report;
+  const src=applyFixedStudyTypeCopy(report?.studyType || report);
   if(!src || !/^[a-z][a-z0-9-]{0,63}$/.test(src.typeId||''))return null;
   const typeName=safeText(src.typeName,80),headline=safeText(src.headline,200),hanja=safeText(src.hanja,40);
   const description=src.description;
@@ -29,7 +30,8 @@ export function suppliedStudyType(report) {
 export function composeFreeReport(calculation,payload,provided=null) {
   const audience=payload.audience==='child'?'child':'self',child=audience==='child',traits=traitSignals(calculation);
   const serverType=calculation?.subjects?.learner?.studySaju;
-  const type=(serverType?.status==='ready'&&serverType.audience===audience?suppliedStudyType(serverType):null)||suppliedStudyType(provided)||selectApprovedType(traits,audience);
+  const selectedType=(serverType?.status==='ready'&&serverType.audience===audience?suppliedStudyType(serverType):null)||suppliedStudyType(provided)||selectApprovedType(traits,audience);
+  const type=applyFixedStudyTypeCopy(selectedType);
   const allStrengths=STRENGTH_BLOCKS.filter(b=>matches(b,traits));
   const interpretation=buildInterpretation(calculation,payload,{strengths:allStrengths});
   const order=interpretation.strengthOrder||[];

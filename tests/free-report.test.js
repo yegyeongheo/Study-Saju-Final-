@@ -6,6 +6,7 @@ import {selectApprovedType} from '../dist/study-type-rules.js';
 import {shareSnapshot,createResultShare} from '../dist/result-share.js';
 import {createFreeReportView} from '../dist/free-report-view.js';
 import {readFileSync} from 'node:fs';
+import {FIXED_STUDY_TYPE_COPY,applyFixedStudyTypeCopy} from '../dist/study-type-copy.js';
 
 const base={year:'甲子',month:'丁卯',day:'戊辰',hour:'辛酉'};
 const high={analytical:'HIGH',planning:'VERY_HIGH',independence:'HIGH',pressure_sensitivity:'HIGH'};
@@ -85,6 +86,30 @@ function dom(){
   globalThis.document={getElementById(id){assert.ok(nodes.has(id),`Unknown HTML id: ${id}`);return nodes.get(id);},createElement:tag=>new Node(tag),querySelectorAll:()=>[]};
   globalThis.window={};return nodes;
 }
+test('all eight final stories render verbatim in one paragraph for both audiences despite adapter copy',()=>{
+  const canonical=JSON.parse(readFileSync(new URL('../config/study-type-story-v1.1.1.json',import.meta.url),'utf8'));
+  assert.deepEqual(FIXED_STUDY_TYPE_COPY,canonical);
+  assert.equal(Object.keys(canonical.types).length,8);
+  const nodes=dom(),view=createFreeReportView({createShare:()=>({prepare(){},reset(){}})});
+  for(const [typeId,copy] of Object.entries(canonical.types)){
+    const supplied={typeId,typeName:'old name',hanja:'舊',headline:'old headline',description:['old one.','old two.','old three.'],pain:'retained pain',hook:'retained hook'};
+    const before=JSON.stringify(supplied);
+    for(const audience of ['child','self']){
+      const p={...payload,audience,personalization:{focus:{id:audience==='child'?'stress':'exam-admission'}}};
+      view.render(calculation(),p,{studyType:supplied});
+      assert.equal(nodes.get('study-card-title').textContent,copy.name);
+      assert.equal(nodes.get('study-core-line').textContent,copy.headline);
+      assert.equal(nodes.get('study-description').children.length,1);
+      assert.equal(nodes.get('study-description').children[0].tagName,'p');
+      assert.equal(nodes.get('study-description').textContent,copy.story);
+      assert.equal(composeFreeReport(calculation(),p,{studyType:supplied}).type.pain,'retained pain');
+    }
+    assert.equal(JSON.stringify(supplied),before);
+  }
+  assert.equal(applyFixedStudyTypeCopy(null),null);
+  const unknown={typeId:'unapproved',headline:'keep'};
+  assert.equal(applyFixedStudyTypeCopy(unknown),unknown);
+});
 test('full view renders five ordered sections, both audiences, six-letter table, honest offer and clean reset',()=>{
   const nodes=dom(),shared=[];
   const view=createFreeReportView({createShare:()=>({prepare:s=>shared.push(s),reset(){}})});

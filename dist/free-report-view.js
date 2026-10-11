@@ -96,7 +96,7 @@ export function createFreeReportView({createShare=createResultShare,offer=REPORT
     el('study-card-title').textContent=model.type?.typeName||'공부유형 결과 준비 중';
     el('study-hanja').hidden=!model.type;el('study-hanja').textContent=model.type?.hanja||'';
     el('study-core-line').textContent=model.type?.headline||'공부유형 판정 기준을 연결하고 있어요.';
-    paragraphs('study-description',model.type?.description||['아래에서는 현재 확인된 사주의 세부 특성을 먼저 살펴볼 수 있어요.']);
+    paragraphs('study-description',model.type?.description?[model.type.description.join(' ')]:['아래에서는 현재 확인된 사주의 세부 특성을 먼저 살펴볼 수 있어요.']);
     el('study-type-pain').hidden=!model.type?.pain;
     el('study-type-pain').textContent=model.type?.pain?(child?model.type.pain.replaceAll('나에게','아이에게'):model.type.pain):'';
     el('study-strengths').replaceChildren();
