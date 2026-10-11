@@ -85,3 +85,11 @@
 .report-evidence summary:focus-visible{outline:2px solid #d5bd79;outline-offset:5px;border-radius:3px}
 .report-evidence .report-story-source{margin:10px 0 0;font-size:14px}
 @media(max-width:380px){.report-story-resolution{padding:23px 17px}.report-story-part p{line-height:1.9}}
+
+/* Paid outline uses the same type and colors; no generated report is advertised. */
+.paid-chapter-details { margin-top:12px; text-align:left; }
+.paid-chapter-details summary { cursor:pointer; font-size:.85rem; color:var(--muted,#72718a); padding:6px 0; }
+.paid-chapter-details summary:focus-visible { outline:2px solid #8884b8; outline-offset:4px; }
+.paid-chapter-section { padding:12px 0; border-top:1px solid rgba(130,125,160,.13); }
+.paid-chapter-section h4 { margin:0 0 6px; font-size:.94rem; line-height:1.6; }
+.paid-chapter-section p { margin:0; line-height:1.8; word-break:keep-all; overflow-wrap:anywhere; }

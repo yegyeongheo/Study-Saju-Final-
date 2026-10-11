@@ -1,3 +1,4 @@
+import {createReportFlow} from './report-flow.js';
 import {createConsentController} from './consent.js';
 import {createReportIntro} from './report-intro.js';
 import {createFreeResultController} from './free-result.js';
@@ -13,8 +14,8 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   const form = document.getElementById('intake-form');
   const consent = createConsentController();
   const sections = Object.fromEntries([...document.querySelectorAll('[data-person]')].map(el => [el.dataset.person, el]));
-  const views = {choose:document.getElementById('choose-view'), input:document.getElementById('details-view'), review:document.getElementById('review-view'), questions:document.getElementById('questions-view'), intro:document.getElementById('report-intro'), results:document.getElementById('free-result-view')};
-  const headings = {choose:document.getElementById('choose-title'), input:document.getElementById('details-title'), review:document.getElementById('review-title'), questions:document.getElementById('question-title'), intro:document.getElementById('intro-title'), results:document.getElementById('free-result-title')};
+  const views = {choose:document.getElementById('choose-view'), input:document.getElementById('details-view'), review:document.getElementById('review-view'), questions:document.getElementById('questions-view'), intro:document.getElementById('report-intro'), results:document.getElementById('free-result-view'), checkout:document.getElementById('checkout-view'), reportPreview:document.getElementById('full-report-view'), fullReport:document.getElementById('full-report-view')};
+  const headings = {choose:document.getElementById('choose-title'), input:document.getElementById('details-title'), review:document.getElementById('review-title'), questions:document.getElementById('question-title'), intro:document.getElementById('intro-title'), results:document.getElementById('free-result-title'), checkout:document.getElementById('checkout-title'), reportPreview:document.getElementById('full-report-title'), fullReport:document.getElementById('full-report-title')};
   const studyDrafts = {child:'', self:''};
   const answerDrafts = {child:createAnswers(), self:createAnswers()};
   let questionIndex = 0;
@@ -24,6 +25,8 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   let confirmedPayload = null;
   let introFinishedPayload = null;
   const freeResult = createFreeResultController();
+  const reportFlow = createReportFlow({getSnapshot:()=>freeResult.getSnapshot(),restoreSnapshot:snapshot=>freeResult.restoreSnapshot(snapshot),navigate:view=>go(view)});
+  window.addEventListener('studysaju:checkout-open',()=>go('checkout'));
   // Calculation data stays in page memory and is cleared when input changes.
   window.studySajuCore = Object.freeze({getResult:() => freeResult.getCalculation()});
   const intro = createReportIntro({onOpen:() => {
@@ -127,8 +130,9 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
   function showView(view, moveFocus = true) {
     consent.closeDialog();
     intro.stop();
+    reportFlow.leave();
     if (['choose', 'input', 'questions'].includes(view)) clearAnalysis();
-    Object.entries(views).forEach(([key, el]) => el.hidden = key !== view);
+    Object.values(views).forEach(el => el.hidden = el !== views[view]);
     document.body.classList.toggle('is-form', view !== 'choose');
     document.body.classList.toggle('is-intro', view === 'intro');
     if (moveFocus) {
@@ -136,6 +140,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
       headings[view].focus({preventScroll:true});
     }
     if (view === 'intro') intro.start(audience);
+    if (['checkout','reportPreview','fullReport'].includes(view)) reportFlow.show(view);
   }
   function clearAnalysis() {
     confirmedPayload = null;
@@ -143,6 +148,8 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     freeResult.reset();
   }
   function resolveView(view) {
+    // A payment return is checked by the server even after a full page reload.
+    if (view === 'fullReport') return view;
     if (!views[view] || view === 'choose' || !audience) return 'choose';
     if (view === 'input') return view;
     if (!lastPayload || lastPayload.audience !== audience || inputDirty || !consent.isReady()) return 'input';
@@ -150,10 +157,14 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     if (!lastPayload.personalization) return 'questions';
     if (view === 'review') return view;
     if (confirmedPayload !== lastPayload) return 'review';
-    if (view === 'results' && introFinishedPayload !== lastPayload) return 'intro';
+    if (['results','checkout','reportPreview'].includes(view) && introFinishedPayload !== lastPayload) return 'intro';
+    if (['checkout','reportPreview'].includes(view) && !freeResult.getSnapshot()) return 'results';
     return view;
   }
   function viewHash(view) {
+    if (view === 'checkout') return '#checkout';
+    if (view === 'reportPreview') return '#report-preview';
+    if (view === 'fullReport') return '#full-report';
     return view === 'choose' ? '' : view === 'input' ? '#information' : view === 'questions' ? '#question-' + (questionIndex + 1) : view === 'intro' ? '#intro' : view === 'results' ? '#free-result' : '#check';
   }
   function go(view, step = 0) {
@@ -237,6 +248,11 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     showView(view);
   });
   window.addEventListener('pageshow', event => {
+    if(event.persisted&&['checkout','reportPreview','fullReport'].includes(history.state?.view)){
+      const view=resolveView(history.state.view);
+      history.replaceState({view,audience},'',location.pathname+viewHash(view));
+      showView(view);return;
+    }
     if (event.persisted && !views.intro.hidden && lastPayload?.personalization) {
       if (consent.isReady()) intro.start(audience); else go('input');
     }
@@ -429,6 +445,7 @@ import {QUESTIONNAIRES, createAnswers, countCharacters, limitQuestion, buildPers
     inputDirty = false;
     go('questions', 0);
   });
-  history.replaceState({view:'choose', audience:null}, '', location.pathname);
-  showView('choose', false);
+  const initialView=location.hash==='#full-report'?'fullReport':'choose';
+  history.replaceState({view:initialView, audience:null}, '', location.pathname+viewHash(initialView));
+  showView(initialView, false);
 })();

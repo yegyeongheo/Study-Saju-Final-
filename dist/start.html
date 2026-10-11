@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="intake.css">
   <link rel="stylesheet" href="free-report.css">
+  <link rel="stylesheet" href="report-flow.css">
   <link rel="stylesheet" href="report-intro.css">
   <script type="module" src="intake.js"></script>
 </head>
@@ -166,6 +167,7 @@
         <p id="free-result-status-message">현재는 화면 미리보기이며,<br>실제 사주 분석 결과는 아직 제공되지 않아요.</p>
       </div>
       <div id="free-result-content" class="free-report-content" hidden>
+        <div id="free-overview-home"><div id="free-overview">
         <div class="report-cards" id="report-cards">
           <section class="report-section report-card" aria-labelledby="study-section-title">
             <p class="report-section-number">01 · STUDY TYPE</p>
@@ -224,6 +226,7 @@
           <p class="report-prose graph-summary" id="element-summary"></p>
           <p class="report-data-note" id="element-notice"></p>
         </section>
+        </div></div>
         <section class="report-section report-offer" aria-labelledby="paid-report-title">
           <p class="report-section-number">05 · THE NEXT CHAPTER</p>
           <h2 id="paid-report-title">공부 운명서 펼치기</h2>
@@ -231,7 +234,7 @@
           <p class="report-data-note" id="paid-report-scope"></p>
           <ol class="report-chapters" id="paid-report-chapters"></ol>
           <p class="report-price" id="paid-report-price"></p>
-          <button type="button" class="primary" id="open-paid-report" disabled>나의 공부 운명서 펼치기</button>
+          <button type="button" class="primary" id="open-paid-report" disabled>9,900원 결제하기</button>
           <p class="report-data-note" id="paid-report-status" role="status"></p>
         </section>
         <section class="report-share" aria-labelledby="share-heading">
@@ -248,6 +251,40 @@
       </div>
       <button class="primary" id="retry-analysis" type="button" hidden>다시 분석하기</button>
       <button class="back-link home-link" id="result-information" type="button">입력 정보 확인하기</button>
+    </section>
+    <section class="intake-view checkout-view" id="checkout-view" aria-labelledby="checkout-title" hidden>
+      <button class="back-link" type="button" id="checkout-back">← 무료 해석으로</button>
+      <p class="eyebrow">STUDY SAJU · YOUR NEXT CHAPTER</p>
+      <h1 id="checkout-title" tabindex="-1">나의 공부 운명서</h1>
+      <p class="checkout-intro">타고난 기질을 이해했다면,<br>이제 공부의 방법을 찾아볼 차례.</p>
+      <div class="order-summary">
+        <span class="order-edition">한 권으로 이어지는 나의 이야기</span>
+        <p>무료 해석 <span aria-hidden="true">＋</span> 유료 10개 챕터</p>
+        <strong>9,900<span>원</span></strong>
+        <small>한 번 결제 · 정기 구독 아님</small>
+      </div>
+      <ol class="checkout-steps" aria-label="이용 순서"><li>결제</li><li>결제 확인</li><li>전체 운명서</li></ol>
+      <details class="checkout-contents"><summary>운명서에 담기는 10가지 이야기</summary><ol id="checkout-chapters" class="report-chapters"></ol></details>
+      <div class="checkout-availability" role="status"><strong>결제를 준비하고 있어요.</strong><p>아직 결제는 진행되지 않아요.<br>전체 운명서에 담길 구성을 먼저 살펴보세요.</p></div>
+      <button class="primary" type="button" id="checkout-pay" disabled>9,900원 · 결제 준비 중</button>
+      <button class="back-link report-preview-link" type="button" id="preview-full-report">전체 리포트 구성 미리보기 <span aria-hidden="true">→</span></button>
+    </section>
+
+    <section class="intake-view full-report-view" id="full-report-view" aria-labelledby="full-report-title" hidden>
+      <button class="back-link" type="button" id="full-report-back">← 이전 화면</button>
+      <p class="eyebrow" id="full-report-label">STUDY SAJU · FULL REPORT</p>
+      <h1 id="full-report-title" tabindex="-1">나의 공부 운명서</h1>
+      <p class="report-reader-notice" id="full-report-notice"></p>
+      <div id="full-report-state" class="free-result-status" role="status" aria-live="polite"><h2 id="full-report-state-title"></h2><p id="full-report-state-message"></p></div>
+      <button type="button" class="primary" id="retry-full-report" hidden>다시 확인하기</button>
+      <div id="full-report-content" hidden>
+        <nav class="reader-nav" aria-label="운명서 목차"><label for="report-chapter-jump">목차</label><select id="report-chapter-jump"></select></nav>
+        <section id="full-free-section" class="reader-free" aria-labelledby="full-free-title"><p class="eyebrow">PROLOGUE · 나를 이해하는 첫 장</p><h2 id="full-free-title" tabindex="-1">무료 해석</h2><div id="full-free-content"></div></section>
+        <div class="reader-divider"><span>그리고, 나에게 맞는 공부의 길</span></div>
+        <div id="full-paid-chapters"></div>
+        <p class="report-disclaimer">사주를 바탕으로 한 자기 이해 콘텐츠입니다.<br>실제 경험과 함께 살펴보세요.</p>
+        <button type="button" class="back-link" id="report-to-top">목차로 돌아가기 ↑</button>
+      </div>
     </section>
   </main>
   <dialog class="consent-dialog" id="consent-dialog" aria-labelledby="consent-dialog-title" aria-describedby="consent-dialog-intro">

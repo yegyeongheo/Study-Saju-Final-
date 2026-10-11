@@ -1,7 +1,9 @@
+import {validateReportOffer} from './report-readiness.js';
+import {PAID_REPORT_SPEC,CYCLE_UNAVAILABLE_COPY} from './paid-report-spec.js';
 import {createReportCards} from './report-cards.js';
 import {composeFreeReport} from './free-report-model.js';
 import {ELEMENT_ORDER,ELEMENT_LABELS} from './natal-display.js';
-import {REPORT_OFFER,REPORT_CHAPTERS,REPORT_CHAPTER_DETAILS} from './report-offer.js';
+import {REPORT_OFFER,REPORT_CHAPTERS} from './report-offer.js';
 import {createResultShare,shareSnapshot} from './result-share.js';
 
 const color={wood:'#83bba8',fire:'#d4989b',earth:'#d2bb7d',metal:'#c7c5db',water:'#93a9d0'};
@@ -60,24 +62,27 @@ export function createFreeReportView({createShare=createResultShare,offer=REPORT
     el('element-summary').textContent=natal.summary;el('element-notice').textContent=natal.notice;
   }
   function renderOffer(model){
-    const child=model.audience==='child',available=offer.available&&Number.isFinite(offer.price)&&offer.price>=0&&offer.providedChapters.length>0&&(!offer.providedChapters.includes(9)||offer.cycleVerified)&&typeof window.studySajuCheckout==='function';
+    const verified=validateReportOffer(offer,model.audience,false);
     el('paid-report-lead').textContent=model.purchaseLead;
-    el('paid-report-scope').textContent=available?'구매 시 제공되는 항목을 아래에서 확인해 주세요.':'아래는 준비 중인 10개 장의 구성입니다. 현재 유료 리포트 제공과 결제는 시작 전이에요.';
+    el('paid-report-scope').textContent='무료 해석에 10개 챕터를 더해, 하나의 공부 운명서로 읽어요.';
+    const outlineLink=node('a',' 전체 목차 보기');outlineLink.href='/report-outline.html';el('paid-report-scope').append(outlineLink);
     el('paid-report-chapters').replaceChildren();
     REPORT_CHAPTERS[model.audience].forEach((title,index)=>{
-      const row=node('li'),content=node('div');content.append(node('strong',title),node('p',REPORT_CHAPTER_DETAILS[model.audience][index]));
-      if(index===8&&!offer.cycleVerified)content.append(node('small','시기 해석 연결·검증 후 제공 범위 확정'));
-      else if(available)content.append(node('small',offer.providedChapters.includes(index+1)?'구매 시 제공':'제공 준비 중 · 구매 항목 제외'));
+      const row=node('li'),content=node('div');content.append(node('strong',title));
+      const detail=node('details',undefined,'paid-chapter-details');
+      detail.append(node('summary','이 장에서 살펴볼 내용'));
+      for(const section of PAID_REPORT_SPEC[model.audience][index].sections){
+        const part=node('div',undefined,'paid-chapter-section');
+        part.append(node('h4',section.heading),node('p',section.intro));detail.append(part);
+      }
+      content.append(detail);
+      if(index===8&&!verified.cycleVerified)content.append(node('small',CYCLE_UNAVAILABLE_COPY));
       row.append(content);el('paid-report-chapters').append(row);
     });
-    const price=el('paid-report-price');price.replaceChildren(node('small',available?'이용 가격':'출시 예정 가격'));
-    price.append(node('span',Number.isFinite(offer.price)?`${new Intl.NumberFormat('ko-KR').format(offer.price)}원`:'확정 후 안내'));
-    const button=el('open-paid-report');button.textContent=child?'우리 아이 공부 운명서 펼치기':'나의 공부 운명서 펼치기';button.disabled=!available;
-    el('paid-report-status').textContent=available?'':'실제 제공 항목이 확정되면 열려요.';
-    button.onclick=available?async()=>{
-      button.disabled=true;
-      try{await window.studySajuCheckout({audience:model.audience});}catch{el('paid-report-status').textContent='구매 안내를 열지 못했어요. 다시 시도해 주세요.';}finally{button.disabled=false;}
-    }:null;
+    el('paid-report-price').replaceChildren(node('small','무료 해석 + 유료 10개 챕터'),node('span','9,900원'));
+    const button=el('open-paid-report');button.textContent='9,900원 결제하기';button.disabled=false;
+    el('paid-report-status').textContent='현재 결제 준비 중 · 버튼을 누르면 상품 구성을 확인할 수 있어요.';
+    button.onclick=()=>window.dispatchEvent(new CustomEvent('studysaju:checkout-open'));
   }
   function render(calculation,payload,report){
     if(calculation===lastCalculation&&payload===lastPayload&&report===lastReport)return;

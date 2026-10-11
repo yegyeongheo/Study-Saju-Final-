@@ -94,14 +94,14 @@ test('full view renders five ordered sections, both audiences, six-letter table,
   assert.match(nodes.get('study-card-title').textContent,/준비 중/);
   assert.equal(nodes.get('study-strengths').children.length,2);
   assert.equal(nodes.get('combined-insights').children.length,3);
-  assert.equal(nodes.get('paid-report-chapters').children.length,10);assert.equal(nodes.get('open-paid-report').disabled,true);
-  assert.match(nodes.get('paid-report-price').textContent,/확정 후 안내/);
+  assert.equal(nodes.get('paid-report-chapters').children.length,10);assert.equal(nodes.get('open-paid-report').disabled,false);
+  assert.match(nodes.get('paid-report-price').textContent,/9,900원/);
   assert.equal(nodes.get('element-bars').children.length,5);
   view.render(calculation(),{...payload,audience:'child',learner:{...payload.learner,birthTime:{isUnknown:true}}},null);
   assert.equal(nodes.get('study-section-title').textContent,'우리 아이의 공부유형은');
   assert.equal(nodes.get('guardian-section-title').textContent,'우리 아이의 수호카드');
   assert.match(nodes.get('natal-basis').textContent,/6글자 기준 · 시주 제외/);assert.match(nodes.get('natal-table').textContent,/미상/);
-  assert.equal(nodes.get('open-paid-report').textContent,'우리 아이 공부 운명서 펼치기');
+  assert.equal(nodes.get('open-paid-report').textContent,'9,900원 결제하기');
   view.reset();assert.equal(nodes.get('combined-insights').textContent,'');assert.equal(nodes.get('natal-table').textContent,'');assert.equal(nodes.get('report-cards').hidden,true);
 });
 test('image export ignores stale asynchronous results and revokes previous private blobs',async()=>{

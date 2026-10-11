@@ -1,3 +1,4 @@
+import {commerceResponse} from './commerce.js';
 // Server-only Cloudflare/Sites entry point. Never bundle into dist.
 const jsonError = (status, code) => new Response(JSON.stringify({status:'error',error:{code}}),
   {status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
@@ -55,6 +56,8 @@ export async function relay(request, env, fetchImpl = fetch) {
 
 export default {
   async fetch(request,env) {
+    const commerce=commerceResponse(request);
+    if(commerce)return commerce;
     if (new URL(request.url).pathname==='/api/saju/v1/analyze') return relay(request,env);
     return env.ASSETS.fetch(request);
   }

@@ -1,0 +1,47 @@
+.checkout-view,.full-report-view{width:min(100%,680px);text-align:center}
+.checkout-view>h1,.full-report-view>h1{font:clamp(30px,7vw,40px)/1.55 'Gowun Batang',serif;color:var(--lav);word-break:keep-all;overflow-wrap:anywhere;margin:24px 0}
+.checkout-view>.back-link,.full-report-view>.back-link{display:block;margin:0 0 40px;text-align:left}
+.checkout-intro{font-size:17px;line-height:1.9;color:#d6cfe3;margin:0 0 36px;word-break:keep-all}
+.order-summary{border:1px solid #c6b8ea50;border-radius:20px;padding:30px 16px;background:radial-gradient(ellipse at 50% 0,#c6b8ea16,transparent 75%),#20243dbb}
+.order-edition{font-size:12px;letter-spacing:1px;color:#c8b998}
+.order-summary p{font:21px/1.7 'Gowun Batang',serif;color:#eee7f7;margin:17px 0}
+.order-summary p span{padding:0 7px;color:var(--lav)}
+.order-summary strong{font-size:38px;font-weight:500;letter-spacing:-1px;color:#eee6ff;display:block}
+.order-summary strong span{font-size:22px;margin-left:4px}
+.order-summary small{display:block;font-size:13px;line-height:1.8;color:#bcb5ce;margin-top:10px}
+.checkout-steps{display:flex;justify-content:center;align-items:center;list-style:none;padding:0;gap:10px;margin:30px 0;color:#c5b9d6;font-size:13px}
+.checkout-steps li+li:before{content:'·';margin-right:10px;color:#c8b998}
+.checkout-contents{border-block:1px solid #c6b8ea30;margin:34px 0;text-align:left}
+.checkout-contents summary{cursor:pointer;min-height:60px;padding:18px 10px;line-height:1.8;font-size:15px;color:#e0d5ef}
+.checkout-contents .report-chapters{margin:0 10px 12px}
+.checkout-availability{margin:28px 0;color:#c4bbd3}
+.checkout-availability strong{font-size:16px;font-weight:500;color:var(--lav)}
+.checkout-availability p{font-size:14px;line-height:1.9}
+.checkout-view .primary{width:100%;margin:10px 0 0}
+.checkout-view .primary:disabled{opacity:.5;cursor:not-allowed}
+.report-preview-link{margin-top:18px;min-height:48px;color:var(--lav)}
+.report-reader-notice{font-size:14px;line-height:1.9;color:#c4bbd3;border-block:1px solid #c6b8ea30;padding:20px 10px;margin:26px 0}
+.report-reader-notice:empty{display:none}
+.reader-nav{position:sticky;top:0;z-index:10;display:flex;gap:14px;align-items:center;background:#20243df5;backdrop-filter:blur(12px);padding:15px 10px;border-bottom:1px solid #c6b8ea40;margin-bottom:38px}
+.reader-nav label{font-size:13px;white-space:nowrap;color:#b9afcc}
+.reader-nav select{min-width:0;width:100%;min-height:46px;background:#292d49;border:1px solid #c6b8ea55;border-radius:9px;color:#e9defb;padding:10px;font:14px 'Noto Sans KR',sans-serif}
+.reader-free>h2{font:30px/1.6 'Gowun Batang',serif;color:var(--lav);margin:20px 0 35px}
+.reader-free .eyebrow{font-size:11px;letter-spacing:1.5px}
+.reader-divider{display:flex;gap:16px;align-items:center;color:#d1bd93;font:17px/1.8 'Gowun Batang',serif;margin:44px 0 30px;word-break:keep-all}
+.reader-divider:before,.reader-divider:after{content:'';height:1px;flex:1;background:#d1bd9345}
+.reader-chapter{padding:50px 0;border-bottom:1px solid #c6b8ea30;scroll-margin-top:96px}
+.reader-chapter>h2{font:clamp(26px,6vw,33px)/1.6 'Gowun Batang',serif;color:#eee4fb;word-break:keep-all;overflow-wrap:anywhere;margin:20px 0 26px}
+.reader-deck{font-size:16px;line-height:1.9;color:#d6cce4;max-width:460px;margin:0 auto 26px;word-break:keep-all}
+.reader-outline{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:22px 0;margin:20px 0;border-block:1px solid #c6b8ea25}
+.reader-outline span{font-size:13px;line-height:1.8;color:#c6b8ea;word-break:keep-all}
+.reader-part{text-align:left;padding:28px 0;max-width:520px;margin:auto;word-break:keep-all;overflow-wrap:anywhere}
+.reader-part+.reader-part{border-top:1px solid #c6b8ea25}
+.reader-part .reader-part-label{font-size:12px;color:#c6b8ea;letter-spacing:1px;margin:0 0 10px}
+.reader-part h3{font:23px/1.65 'Gowun Batang',serif;color:#eee5fa;margin:0 0 22px}
+.reader-part p{font-size:16px;line-height:2;color:#ded7e9;margin:0 0 20px}
+.reader-solution h3{color:#e1cda0}
+#full-free-title{scroll-margin-top:96px}
+#full-report-view :focus-visible,#checkout-view :focus-visible{outline:2px solid #c6b8ea;outline-offset:4px}
+@media(max-width:380px){.reader-outline{gap:5px}.reader-outline span{font-size:12px}.order-summary p{font-size:19px}}
+
+.reader-free .report-cards{display:block;margin:0}

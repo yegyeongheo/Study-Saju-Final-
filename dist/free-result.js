@@ -109,5 +109,17 @@ export function createFreeResultController({calculate = calculateCore, createVie
   window.addEventListener('pagehide', () => {
     reset();
   });
-  return {prepare, reset, render, getCalculation:() => calculation ? structuredClone(calculation) : null};
+  function getSnapshot() {
+    if (!['ready','calculated'].includes(state) || !cardSubject || !calculation) return null;
+    return structuredClone({calculation,payload:cardSubject,report});
+  }
+  // Called only with the validated, authenticated report response, never URL/localStorage data.
+  function restoreSnapshot(snapshot) {
+    reset();
+    calculation=structuredClone(snapshot.calculation);
+    cardSubject=structuredClone(snapshot.payload);
+    report=snapshot.report?structuredClone(snapshot.report):null;
+    state=report?'ready':'calculated';render();
+  }
+  return {prepare, reset, render, getSnapshot, restoreSnapshot, getCalculation:() => calculation ? structuredClone(calculation) : null};
 }

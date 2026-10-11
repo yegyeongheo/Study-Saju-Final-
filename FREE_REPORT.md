@@ -1,3 +1,7 @@
+# 2026-10-11 구매 흐름 업데이트
+
+무료 결과 CTA는 **9,900원 결제하기**로 변경했다. 상품 안내와 무료+10장 구성 미리보기를 제공하며 실제 결제 버튼은 연결 전 상태다. 서버에서 결제를 확인한 뒤 본문을 받아 여는 전체 리포트 경로와 Render 연결 계약은 [REPORT_PURCHASE_FLOW.md](REPORT_PURCHASE_FLOW.md)에 기록했다. 아래 기록의 가격 미정/무료 결과 CTA 비활성화 설명은 이 업데이트로 대체한다.
+
 # 현재 해석: v2
 
 2026-10-11부터 해석 로직은 [INTERPRETATION.md](INTERPRETATION.md)를 따른다. 아래의 이전 블록 선택/배열 우선순위 설명보다 이 문서가 우선한다. `interpretation-plan.js`가 코어 근거·발현을 읽고 관계를 선택하며, `interpretation-stories.js`와 `interpretation-writer.js`가 원인에 연결된 서술·실천을 구성한다. `free-report-model.js`와 실제 뷰에 연결되어 있다.
